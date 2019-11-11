@@ -1,0 +1,18 @@
+\afterpreface \doublespacing
+\chapter{General Introduction}\label{ch:Introduction}
+
+\section{Purpose}
+The study of vibrational and rovibrational states is fundamentally important to predicting and understanding spectra.  Vibrational states play a key role in phenomena such as how molecules respond to the presence of light.  The improved knowledge of vibrational states at a fundamental level is important to a wide array of applications, from pharmaceutical drug delivery to fuel cell technology. 
+
+
+However, difficulty arises when attempting to calculate these vibrational states in that the matrix representation (in a set of basis functions) of the Hamiltonian grows exponentially with the number of degrees of freedom.  Therefore, one must develop new ideas to attenuate this exponential growth.  Phase-based localized basis functions are a possible path to studying larger systems.  
+
+
+
+
+\section{Organization of thesis}
+
+This thesis is in the manuscript format.  The thesis will start by outlining the basics of quantum chemistry and nuclear motion theory, as well as a background in the history of classically motivated basis functions in Chapter \ref{ch:Background}.  There will then be a series of 3 published manuscripts Chapter \ref{ch:PRL} published as \Refc{Brown2015}, Chapter \ref{ch:JCP1} published as \Refc{Brown2015b} and Chapter \ref{ch:JCP2} published as \Refc{Brown2016}.  It will then end with some concluding remarks. 
+
+
+For all manuscripts, I was the first author and Tucker Carrington Jr. was the second author.  The development of the ideas, and the writing of the papers was done collaboratively.  All implementation of the ideas and calculations were done by myself.

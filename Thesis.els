@@ -1,0 +1,19 @@
+\begin{thenomenclature} 
+
+ \nomgroup{A}
+
+  \item [{BF}]\begingroup Body-Fixed\nomeqref {2.1}\nompageref{6}
+  \item [{BO}]\begingroup Born-Oppenheimer\nomeqref {2.0}\nompageref{3}
+  \item [{FBR}]\begingroup Finite Basis Representation\nomeqref {2.17}
+		\nompageref{14}
+  \item [{KEO}]\begingroup Kinetic Energy Operator\nomeqref {2.2}
+		\nompageref{7}
+  \item [{LF}]\begingroup Laboratory-Fixed\nomeqref {2.1}\nompageref{6}
+  \item [{PES}]\begingroup Potential Energy Surface\nomeqref {2.0}
+		\nompageref{5}
+  \item [{PODVR}]\begingroup Potential Optimized Discrete Variable Representation\nomeqref {2.22}
+		\nompageref{16}
+  \item [{VBR}]\begingroup Variational Basis Representation\nomeqref {2.17}
+		\nompageref{14}
+
+\end{thenomenclature}

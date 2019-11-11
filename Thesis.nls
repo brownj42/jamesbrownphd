@@ -1,0 +1,42 @@
+\begin{thenomenclature} 
+
+ \nomgroup{A}
+
+  \item [{BF}]\begingroup Body-Fixed\nomeqref {2.1}\nompageref{6}
+  \item [{BO}]\begingroup Born-Oppenheimer\nomeqref {2.0}\nompageref{3}
+  \item [{DVR}]\begingroup Discrete Variable Representation\nomeqref {2.20}
+		\nompageref{13}
+  \item [{FBR}]\begingroup Finite Basis Representation\nomeqref {2.17}
+		\nompageref{13}
+  \item [{FGH}]\begingroup Fourier Grid Hamiltonian\nomeqref {3.0}
+		\nompageref{26}
+  \item [{HP}]\begingroup Halverson and Poirier\nomeqref {5.3}
+		\nompageref{57}
+  \item [{KEO}]\begingroup Kinetic Energy Operator\nomeqref {2.2}
+		\nompageref{6}
+  \item [{LF}]\begingroup Laboratory-Fixed\nomeqref {2.1}\nompageref{6}
+  \item [{PES}]\begingroup Potential Energy Surface\nomeqref {2.0}
+		\nompageref{5}
+  \item [{PODVR}]\begingroup Potential Optimized Discrete Variable Representation\nomeqref {2.22}
+		\nompageref{15}
+  \item [{PSL}]\begingroup phase-space localized\nomeqref {5.2}
+		\nompageref{56}
+  \item [{pvb}]\begingroup periodic von Neumann with biorthogonal exchange\nomeqref {4.1}
+		\nompageref{32}
+  \item [{pvN}]\begingroup Periodic von Neumann\nomeqref {3.0}
+		\nompageref{26}
+  \item [{SD}]\begingroup Simultaneous Diagonalization\nomeqref {4.1}
+		\nompageref{32}
+  \item [{SG}]\begingroup symmetrized Gaussian\nomeqref {5.0}
+		\nompageref{54}
+  \item [{SOP}]\begingroup sum of products\nomeqref {2.23}
+		\nompageref{16}
+  \item [{ST}]\begingroup Shimshovitz and Tannor\nomeqref {4.1}
+		\nompageref{32}
+  \item [{TISE}]\begingroup Time Independent Schr\"{o}dinger Equation\nomeqref {4.0}
+		\nompageref{30}
+  \item [{VBR}]\begingroup Variational Basis Representation\nomeqref {2.17}
+		\nompageref{13}
+  \item [{vN}]\begingroup von Neumann\nomeqref {4.1}\nompageref{32}
+
+\end{thenomenclature}

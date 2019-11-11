@@ -1,0 +1,17 @@
+\chapter{Summary and Conclusions}\label{ch:Conclusion}
+
+
+
+
+\section{Summary}
+This thesis has made progress in the use of PSL basis functions on multiple fronts.  It was first shown that these basis functions can be used to contract other DVR basis functions which are more useful in general polar coordinates. We then made progress in the theoretical understanding of why the original vN functions of Davis and Heller failed to converge.  This was due to the necessity of projecting on to a grid (most conveniently a DVR) and inverting the resulting overlap matrix before pruning basis functions.  Using a grid removed the issue of needing an huge number of basis functions to obtain a pruneable basis. 
+
+
+Progress has also been made in the dimensionality of the systems one could study using PSL functions.  This was done by converting the symmetric generalized eigenproblem into an non-generalized asymmetric eigenproblem.  This reformulation permitted the use of iterative methods and accurate results could be obtained for a 9D system.  Redefining how the DD matrix elements were calculated also allowed more accurate results to be obtained.  A final improvement was to choose basis functions iteratively from progressively larger calculations as outlined in manuscript 3.  This allowed the calculation of accurate eigenvalues with two orders of magnitude  fewer basis functions than had previously been possible using a classical energy criterium.     
+
+
+\section{Future Work}
+Manuscript 3 has clearly shown that PSL functions are not competitive for calculating accurate vibrational energies of single well problems.  It is certainly possible that PSL functions will be of benefit to the studies of multi-well systems. It is not generally possible to have potentials for multi-well systems in the sum-of-products form assumed in this paper. Therefore, it is necessary to develop methods to calculate spectra using a general potential.  This can possibly be done using collocation, or by utilizing the localized nature of the basis functions to use fewer quadrature points.  For the latter, a method to perform matrix-vector products will need to be developed.  
+
+
+In a broader sense, it is clear that there is now a path to using any set of non-orthogonal basis functions assuming a well-conditioned overlap matrix can be formed. One simply has to project the basis onto a grid. Also, the basis expansion method can be applied to other types of basis functions assuming an order of importance can be imposed \emph{a priori}.  This has been tested on harmonic oscillator basis functions with some success. 

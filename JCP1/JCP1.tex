@@ -1,0 +1,1499 @@
+
+\chapter{Using an iterative eigensolver to compute  vibrational energies with phase-spaced localized basis functions\label{ch:JCP1}}
+\thispagestyle{empty}
+
+\section{Introduction}
+This chapter applies the knowledge obtained from manuscript 1 of the previous chapter to the H$_2$O molecule.  It also discusses in detail the theoretical understanding of why the ST method works. 
+
+The following content of this chapter is the manuscript published as \Refc{Brown2015b}.
+
+\section{Abstract}
+% 
+Although phase-space localized  Gaussians are themselves poor basis functions, they 
+ can be used to effectively contract a discrete variable representation basis (A.  Shimshovitz and D. J. Tannor, Phys. Rev. Lett. 109, 070402 (2012))
+  This works despite the fact that elements of the 
+Hamiltonian  and overlap matrices labelled by discarded Gaussians are not small.  
+By formulating the matrix problem as a regular (i.e. not a generalized)     matrix eigenvalue problem
+we show that it is possible to use 
+ an iterative eigensolver to compute vibrational energy levels in the Gaussian basis.
+
+
+  
+
+
+% body of chapter here - Use proper section commands
+% References should be done using the \cite, \ref, and \label commands
+\section{Introduction}
+
+
+The most general and systematic way to solve the Schr\"{o}dinger equation is to represent   wavefunctions in a basis and use  methods of numerical
+linear algebra to determine coefficients.  For example, to solve a 1D  time-independent Schr\"{o}dinger equation\nomenclature{TISE}{Time Independent Schr\"{o}dinger Equation} (TISE), one uses a basis $   \theta_k(x) $
+\begin{equation}  
+\psi(x) = \sum_k  c_k  \theta_k(x)
+\end{equation}
+and solves for the $  c_k $.   Frequently,  the    $  c_k $ are determined by multiplying on the left by    $ 
+ \theta^*_j(x)$ and integrating to obtain a matrix eigenvalue equation.\cite{Carter1986,Tennyson1986,Sibert1990,Bacic1989,Bowman2008}     
+%
+It is often difficult to implement this procedure
+ to compute  solutions of  the Schr\"{o}dinger equation, from which  vibrational spectra, 
+photodissociation cross sections, rate constants etc, are calculated  because
+the size of common basis sets 
+scales exponentially with the number of coordinates 
+($3N-6$, where $N$ is the number of atoms, for a $J=0$ calculation).    
+
+
+
+The basis is huge in part because quantum mechanics is non-local.  However, it is clear that standard direct product basis sets, although 
+they may facilitate calculations, are much larger than they need to be.   One way to make  a  smaller basis that is adequate for the purpose of 
+computing vibrational spectra is to use products of eigenfunctions of reduced-dimension Hamiltonians. 
+%
+  This contraction idea is sometimes used  with adiabatic-like
+functions.\cite{Bacic1989,Henderson1990,Bowman1991,Qiu1998,Mladenovic2002a,Mladenovic2002b,Luckhaus2000}  
+ In this case,  a set of basis functions for one group of coordinates is  calculated for each of  many values of the other coordinates.  
+Contraction can also be done with ``simply contracted functions''\cite{Carter1988,Bramley1994b}  
+ by computing a single set 
+ of basis functions for one group of coordinates   for one value  of the other coordinates.\cite{Koput2001,Wang2002,Yu2002,Wang2004,Yu2002b,Tremblay2006,Lee2003} % 
+In this chapter we develop and apply a very different contraction strategy.   It is related to the work of Davis and Heller\cite{Davis1979} (DH),  
+ of Poirier and co-workers,\cite{Poirier2003,Poirier2004a,Poirier2004b,Halverson2012,Halverson2015}  and of  Tannor and co-workers.\cite{Shimshovitz2012,Shimshovitz2014}  
+ %
+%
+The key idea is that  an efficient basis is one whose phase space representation covers the same region as the wavefunctions one wishes to compute.  This idea
+motivated the early work of DH, and is clearly expressed in \Refc{Poirier2000} where Poirier discusses the Wigner representation of a basis.    
+%
+
+
+The simple idea of using basis functions (whose Wigner representation is) localized in phase space is intuitive and attractive.    It should enable us 
+to use knowledge extracted from classical mechanics to design an efficient basis.   One expects that a basis covering  (in the Wigner sense) 
+a region slightly larger than the classical region 
+of phase space should be sufficiently large for the purpose of computing accurate wavefunctions.    
+For several decades scientists have pursued the hope that such a classically-motivated basis would be useful    
+%
+%
+\cite{Davis1979,Poirier2000,Poirier2003,
+Poirier2004b,Poirier2004a,Dawes2005,Dawes2006,Halverson2012,Shimshovitz2012,Shimshovitz2014,Halverson2015}.
+ DH were the first to apply this idea in chemical physics.\cite{Davis1979} 
+ They used a 1D von Neumann (vN) basis on a grid with each function corresponding to a phase space area of  size   $h$.     
+Their approach worked surprisingly poorly.   If the area per basis function is reduced and the size of the basis is increased, it is sometimes possible
+to  obtain accurate results.    
+%
+However, in many cases as the basis size is increased (and the ``area'' per function is decreased), 
+near linear dependence of the basis becomes so severe that it is not possible to compute accurate energy levels.
+%
+%  increasing the basis size
+%(and decreasing the ``area'' per function) because numerical problems, arising from the near linear dependence, impede solution of the matrix eigenvalue problem.   
+
+
+Poirier and co-workers introduced new ideas for mitigating  the deficiencies of the DH approach. 
+ In one set of papers,\cite{Poirier2003,Poirier2004b,Poirier2004a} they define orthonormal Weylets and show that  
+it is possible to use a relatively small number of  Weylets  and compute accurate energies. 
+ There is no problem with near linear dependence because the 
+basis is orthonormal.
+%
+    In another set of papers, they use a symmetrized Gaussian basis and solve a generalized eigenvalue problem.\cite{Halverson2012,Halverson2015}   Also
+in this approach,  there is no problem with near linear dependence.   
+%
+%
+%
+Dawes and Carrington used a simultaneous diagonalization\nomenclature{SD}{Simultaneous Diagonalization} (SD) algorithm to make 1D wavelet-like orthogonal basis functions  and showed that for many dimensional problems it possible to calculate
+accurate energies by pruning the basis formed by making 
+ products of the 1D SD  functions products.\cite{Dawes2005,Dawes2006}
+%
+ Shimshovitz and Tannor\nomenclature{ST}{Shimshovitz and Tannor} (ST) \cite{Shimshovitz2012} introduced a ``periodic von Neumann with biorthogonal exchange''\nomenclature{pvb}{periodic von Neumann with biorthogonal exchange} (pvb) basis for solving the TISE.   ST begin with a discrete variable representation \cite{Light1985,Bacic1989,Light2000} (DVR) 
+%
+  of the Hamiltonian, transform to the pvb basis, prune the pvb basis, and solve a generalized
+eigenvalue problem.  
+%
+
+
+Our  chapter reports progress on  two  fronts.  
+ %(1) We demonstrate that it is possible to discard (finite representations of) vN functions.  
+%
+(1) We explain in detail when, and why  discarding vN\nomenclature{vN}{von Neumann} basis functions works, despite the fact that the  corresponding (e.g. Hamiltonian) matrix elements are not small.  
+(2)  We  show that an iterative eigensolver can be used to solve a vN matrix eigenvalue problem.   To do this, it is essential to formulate the 
+problem as a regular (i.e. not a generalized)     matrix eigenvalue problem.
+Because  the matrix eigenvalue problem we solve  is not generalized (i.e. no overlap matrix on the right side multiplying the matrices of 
+eigenvectors and eigenvalues),  it is 
+ possible,   to use an iterative eigensolver and hence avoid storing  large matrices.
+%tc changes .  please take the time to check this.    please sort the references.  please make sure cite(old) appears in the list.  
+%  
+Poirier and co-workers have shown that   phase-space localized basis  methods can be applied to polyatomics        without   iterative  eigensolvers.    Recently this has been achieved by using  massive computers, 
+as methods of direct linear algebra, which require storing matrices,  are used to solve eigenproblems with matrices whose size is $~ \sim 10^5$.  
+\cite{Halverson2012,Halverson2015}
+%
+In an  older paper,  using much less computer power,   
+Poirier applied his   ideas to compute levels of a  15D  isotropic harmonic oscillator with unit frequency.
+\cite{Poirier2003}
+%
+   The  percentage error criterion used   in \cite{Poirier2003}  and  explained in    \Refc{Poirier2004b}   is 
+$\delta_{wavelet}= [100 (E_{eiv}- E_{exact})]/(10 D)$,  where  $D$ is  the dimensionality and   $ E_{eiv}$ is the computed eigenvalue.
+%
+ When  $\delta_{wavelet}= 2$,  absolute errors are large, e.g. when $D=15$ and   $E_{exact}=7.5$ (the energy of the ground state)  
+the  absolute error is   3.           
+Lombardini and Poirier have used a subspace iteration iterative method with their Weylets.  \cite{Lombardini2006}    This is done for model problems  by exploiting sparsity.  
+Iterative eigensolvers obviate the need to store matrices, and thus greatly reduce the cost of computing energy levels of interest.\cite{Bai2000} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Using a von Neumann basis }\label{sec:BC}
+
+In this section we present and analyse several ways of using a von
+Neumann basis.   Subsection \ref{sseca} is devoted to the original DH approach.  Rather
+than using the vN functions as basis functions they can be used to 
+contract a DVR basis. \cite{Halverson2012}  This can be thought of as a basis transformation.     This idea is  introduced in subsection \ref{ssecb}.  In subsection \ref{ssecb} we explain 
+that some basis transformations yield a pruneable matrix and others do not.   The eigenvalue problem is pruneable if rows of the matrix of eigenvectors can be discarded.  
+In subsections \ref{ssecc} and \ref{ssecd},   we compare the two projection strategies.
+
+
+\subsection{Projecting $\hat{H}$  into a vN basis}\label{sseca}
+
+
+%tc no link  between eq 2 and first clause.   tc changed %JB looks good
+%Start with some 
+%huge vN basis  % removed  whose size and parameters make it possible, in principle, to solve the TISE,
+%\begin{equation}
+%\hat{H} \psi_n(x) = \epsilon_n \psi_n(x)   ~.
+%\end{equation}
+%In the huge   vN basis  the   eigenvalue problem is 
+%\begin{equation}
+%\bf{  H_G W} = {\bf{S_G W  E}} ~,
+%\label{full}
+%\end{equation}
+%
+Start by representing 
+\begin{equation}
+\hat{H} \psi_n(x) = \epsilon_n \psi_n(x)   ~.
+\end{equation}
+in a huge vN basis 
+to obtain 
+  the   eigenvalue problem 
+\begin{equation}
+\bf{  H_G W} = {\bf{S_G W  E}} ~,
+\label{full}
+\end{equation}
+where ${ ( \bf{  H_G }   )}_{m',m}$    
+ $ = \langle  g_{m'} \vert \hat{H}  \vert g_m \rangle     $,
+%
+${ ( \bf{  S_G}   )}_{m',m}$    $ = \langle  g_{m'} \vert  g_m \rangle     $, $m',m  = 1, \cdots F$, and   
+ \\  $g_{m(i,j)}(x)=\exp\left[-\alpha_i\left(x-x_i\right)^2 + i p_j\left(x-x_i\right)\right]  $ is a   vN Gaussian   
+ centered at $(x_i,p_j)$ with width parameter $\alpha_i$.  
+%
+%
+In \Eq{full}   $ {\bf{  W} }   $ is a  matrix containing the eigenvectors and 
+ $ {\bf{  E} }   $ is a diagonal matrix whose nonzero elements are the eigenvalues.   
+One hopes that it is possible 
+   discard some of the basis functions (prune the basis) without degrading the accuracy of the eigenvalues.  
+%
+DH replace \Eq{full} with 
+\begin{equation}
+\bf{  H^c_G W^c} = {\bf{S^c_G W^c  E^c}} ~,
+\label{davis}
+\end{equation}
+where,  like   ${   \bf{  H_G}}$  and $  {\bf{S_G }}$,    $({\bf{  H^c_G }})_{m',m}    = \langle  g_{m'} \vert \hat{H}  \vert g_m \rangle   $ 
+and ${ ( \bf{  S^c_G}   )}_{m',m}$    $ = \langle  g_{m'} \vert  g_m \rangle     $, but 
+with $m',m  = 1, \cdots N_k$.  Thus, $N_k$ is the size of the chopped matrix. 
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Projecting    $ {\bf{ H}}$ into a vN basis}\label{ssecb}
+
+%
+
+Instead of using the $g_{m}$ as basis functions,    one can  use   them 
+ to contract some other basis.\cite{Shimshovitz2012}
+   To do this, begin   by projecting the TISE into 
+some real finite orthonormal basis (a discrete variable  representation 
+  \cite{Light1985,Bacic1989,Light2000} 
+basis is convenient) whose $N$ functions are denoted
+ $\phi_\alpha(x)$,
+\begin{equation}  
+\bf{ H U} = {\bf{U \tilde{ E}}} ~.
+\label{dvrmateiv}
+\end{equation}
+ The  goal is now to find a basis of finite-dimensional $vectors$ in which one 
+ can represent columns 
+of ${\bf{  U}}$.   
+ This is not the same as finding a basis of $functions$
+with which we can represent $\psi_n(x)$.
+% 
+We introduce   $ \bf{  U} = {\bf{ G A   }}  $, where   $ {(\bf{  G}})_{\alpha,m} $ = $ \langle \phi_\alpha  \vert     g_m   \rangle $ are elements of a square
+%
+transformation matrix.  One obtains, 
+%
+\begin{equation}
+\bf{G^{\dagger} H G A} = {\bf{S A \tilde{E}}} ~,
+\label{pvnunchop}
+\end{equation}
+where  $\bf{ S} = {\bf{  G^{\dagger}  G }}$.
+%
+%
+%
+%
+%
+%
+%\begin{equation}\label{eq.1}
+%\tilde{g}_m\left(x\right) =\sum_{\alpha=1}^{N}   \langle   \phi_{\alpha} \vert g_m \rangle     \phi_{\alpha}\left(x\right)     ~.
+%\Eq{gtilde}
+%\end{equation}
+The $ {\bf{ H }}  $ used in the original 
+ST   paper was the Fourier grid Hamiltonian\cite{Marston1989}
+%
+  and their   $\phi_{\alpha}(x)  $ were 
+  periodic Fourier-Grid-Hamiltonian (FGH)  functions,   but other DVRs can also be used.\cite{Brown2015,Shimshovitz2014}
+%
+
+
+
+
+
+
+%
+The matrices in     \Eq{pvnunchop} are  as large as  $ { \bf{  H  }}$.  To make the transformation  useful one must prune the basis, i.e. reduce the number of 
+vN functions from $N$ to $N_{k}$.   
+%
+As explained by ST, if this is done by retaining only selected  rows and columns      of  both    $ \bf{G^{\dagger} H G }$
+  and  $ {\bf{S}}$,   eigenvalues of the pruned problem differ significantly from those of   \Eq{pvnunchop}. \cite{Shimshovitz2012}
+%
+       In terms of symbols, 
+$ \bf{ \tilde{{\bar{E}}}}$ differs significantly from   $ \bf{ \tilde{{{E}}}}$, where 
+ ${\bf{     C^{\dagger} G^{\dagger} H  GC A_c} } =   {\bf{C^{\dagger}S C A_c  \tilde{{\bar{E}}}}}~$,
+and 
+  ${\bf{C}}$ is a diagonal matrix with  $N_{k}$  % (the number of retained   basis functions) 
+diagonal elements equal to   one  and $N_d=N-N_{k}$ (the number of discarded  basis functions) 
+ elements equal to zero.  When a matrix is multiplied on the right by ${\bf{C}}$,  
+some of its columns are set to zero.
+
+
+
+%
+%
+In general, prune-ability can be achieved by  replacing   ${\bf{G}}$    
+ with a matrix ${\bf{T}}$ and \Eq{pvnunchop}  with   
+ ${\bf{     T^{\dagger} H  T  X} } =   {\bf{      T^{\dagger}   T  X     {{\tilde{E}}}}}~$, 
+and  choosing  ${\bf{T}}$ so that  
+  ${\bf{     (  T^{\dagger}   T   )^{-1}    T^{\dagger} H  T }}$ 
+%
+(or     ${\bf{        T^{\dagger} H  T   (  T^{\dagger}   T   )^{-1}   }}$  or \\*
+${\bf{       (  T^{\dagger}   T   )^{-1/2} T^{\dagger} H  T   (  T^{\dagger}   T   )^{-1/2}   }}$)    
+is nearly diagonal. % 
+%
+There is another way. 
+%
+Choose a new basis and the corresponding transformation matrix  ${\bf{   T  }}$   so that 
+  ${\bf{  U = T X }}$, 
+ ${\bf{        T^{\dagger} H  T     X =    S_T X \tilde{E} }}$, 
+and ${\bf{        T^{\dagger} H  T^{-\dagger}        Y =  Y \tilde{E} }}$  , 
+%
+ where ${\bf{   S_T=   (  T^{\dagger}   T   )    }}$  and  ${\bf{      T^{-\dagger}    =   (T^{\dagger})^{-1}  }}$,    and choose 
+  ${\bf{         T    }}$ 
+so that  the desired portion of 
+  ${\bf{    Y =    T^{\dagger}   U  }}$  has  rows that  are tiny.
+When such a basis can be found, 
+   it is possible to remove rows and columns of    ${\bf{        T^{\dagger} H    T^{-\dagger}        }}$       without jeopardizing
+the  accuracy of the desired eigenvalues.      
+To explain why this is true,  define  $ { \bf{ M  =     T^{\dagger} H  T^{-\dagger}     }}$, and $  \bf{ {\tilde{M}}}$ which is 
+obtained by   replacing the $N_{k}$ elements,  that correspond to retained  basis functions,   of each of  the  $N_d$  %$N-N_{k}$ 
+columns of  $ { \bf{ M }}$ that correspond to discarded basis functions, with zeros. 
+If the retained and discarded rows and columns are grouped together then the retained-discarded corner of  
+$  \bf{ {\tilde{M} }} $   is zero, and therefore the desired eigenvalues and eigenvectors of $  \bf{ {\tilde{M} }} $ are exactly equal to 
+ eigenvalues and eigenvectors of the retained corner of $  \bf{ {\tilde{M} }} $  and 
+ are nearly equal to eigenvalues  
+ and eigenvectors of the retained-retained corner of $  \bf{ {{M} }} $.
+%
+%
+%
+
+
+One option is to choose  $\bf{ T } = {\bf{    G^{-\dagger}   }} $.
+%
+This choice of $\bf{T}$ is equivalent to beginning with \Eq{pvnunchop} and multiplying on the left by ${\bf{S^{-1}}}$, as ${\bf{S^{-1}G^{\dagger}}=\bf{G^{-1}}}$.
+  One then  obtains 
+%
+\begin{equation}
+\bf{  G^{-1}   H G A} = {\bf{ A \tilde{E}}} ~,
+\label{Avecs}
+\end{equation} 
+where   $ {\bf{  Y}}  $  in the previous paragraph is replaced by    $ {\bf{  A}}  $;
+  $ {\bf{  A= G^{-1}  U }}  $.       
+If   $A_{m,n}  $  were small  for some $m$,  then it would   be possible to discard
+rows and columns of  $
+\bf{  (G^{-1})  H G }$.      Does one expect 
+  $A_{m,n}  $  to be small for some $m$?
+%
+%
+%
+%
+%
+%To compute  the $n$th column  of  ${\bf{ A }}$    , one can discard   rows of    $\bf{ G^{-1}}$  for which 
+%  entries of large  magnitude  only occur in columns 
+% that correspond to  
+% entries of  ${\bf{ U}}_n$                     ( ${\bf{ U}}_n$ is 
+%a  column of   $ {\bf {U}} $)
+%of small  magnitude.    
+%
+%
+The $m$th element of  the $n$th column  of  ${\bf{ A }}$  is small if
+the  entries of large  magnitude  of the $m$th row of 
+   $\bf{ G^{-1}}$   only occur in columns   that correspond to   entries of  ${\bf{ U}}_n$                     ( ${\bf{ U}}_n$ is 
+a  column of   $ {\bf {U}} $) of small  magnitude.    
+%
+However, in general,  there   
+ is no reason to expect some rows of $  \bf{ G^{-1}}  $   to have large magnitude   elements only for  $\alpha$  values for which     $ {\bf {U}}_{\alpha,n} $ is small.  
+%
+%
+It is therefore not obvious that   rows and columns can be  removed from ${
+\bf{  (G^{-1}) H  G }}$.
+% 
+
+
+%
+%
+Another option is to choose        ${\bf{ T }}$    =       ${\bf{ G }}$
+%  
+%
+to  obtain the eigenvalue problem
+ $  {\bf{G^{\dagger} H G^{-\dagger}     B}}= {\bf{B  \tilde{E}}} $, where
+in this case  ${\bf{ Y }}$  is replaced by    ${\bf{ B }}$  and   ${\bf{ B }}$  =  ${\bf{G^{\dagger} U }}$.   
+%
+%
+If no rows and columns are removed,  the eigenvalues are equal to those obtained from the  pvb formulation of ST,
+ but in the pvb basis one must solve    a generalized eigenvalue problem.   
+  Is there reason to believe that rows of the desired portion of  ${\bf{B}}$ may be small?     
+% 
+ When  the $ \phi_{\alpha}$ basis is a DVR basis,    the $m$th element of the $n$th column of ${\bf{B}}$ will be small if in 
+ the $m$th row of   $ \bf{G^{\dagger}}$   
+   the only large magnitude elements  
+ correspond to   $ \vert g_m(x_{\alpha} ) \vert  $ values 
+for     which the magnitude of 
+ $\psi_n(x_{\alpha})$ is small.   
+%
+%
+  There are such rows    because the 
+$  {g_m} $ functions and the wavefunctions  are localized in position space.\cite{Shimshovitz2014,Tannor2014} 
+%
+%
+ The $m$th element of the $n$th column of ${\bf{B}}$ will  be small 
+whenever  ${\bf{G}}_m^{\dagger}   {\bf {U}}_{n} $ is small.   This can happen even if in  
+  row  ${\bf{G}}_m^{\dagger}$  of  ${\bf{G}}^{\dagger} $    elements of large magnitude    correspond to large elements   $ \vert  {\bf {U}}_{\alpha,n} \vert $.  It 
+%
+  occurs, for example,  when 
+a vN  Gaussian is highly oscillatory (i.e. large $p_j$) in a region in which 
+ $\psi_n\left(x_{\alpha}\right)$ is relatively flat.  
+%
+Some  rows of the desired portion of ${\bf{B}}$   are small  because both   
+ the vN Gaussians and the wavefunctions are    localized in momentum space.   
+%
+For these reasons, and because 
+ $  {\bf{G^{\dagger} H  G^{-\dagger}     B}}$
+= ${\bf{B  \tilde{E}}} $ is not a generalized eigenvalue problem,  it should be possible to 
+remove columns and rows of     $  {\bf{G^{\dagger} H  {G^{-\dagger} }}}$    without significantly altering  the desired  eigenvalues.   
+%
+The pruned  eigenvalue problem obtained from  
+ $  {\bf{G^{\dagger} H  G^{-\dagger}     B}}= {\bf{B  \tilde{E}}} $
+ is 
+\begin{equation}
+\bf{C^{\dagger} G^{\dagger} H  G^{-\dagger}    C B_c}=\bf{  B_c \widetilde{E^B_c}},
+\label{pruneB}
+\end{equation}   
+%
+%$   {\bf{  B_c}}$ is obtained from $   {\bf{  B}}$ by removing rows.  
+%
+Note that pruning     $  {\bf{G^{\dagger} H  {G^{-\dagger} }}}$   by  removing rows of   $  {\bf{G^{\dagger} }}$ and pruning 
+ $  {\bf{G^{-1} H  G }}$  
+ by    removing rows of   $  {\bf{G^{-\dagger} }}$  correspond to removing different   vN functions.  
+%
+The  desired  eigenvalues of \Eq{pruneB} are close to those of the un-pruned problem.     \Eq{pruneB} is used in Section \ref{sec:h2o}.     
+
+
+
+
+
+
+
+
+
+
+
+As explained after \Eq{Avecs}, one does not necessarily expect some rows  of the desired portion of $ { \bf{    A} }$,
+ where 
+ $  \bf{    G^{-1} H    G    A} = {\bf{ A \tilde{E}}} $ to be small.  Therefore,  it is not clear that eigenvalues of the corresponding pruned problem, 
+\begin{equation}
+ \bf{C^T     G^{-1} H    G     C A_c} = {\bf{ A_c \widetilde{E^A_c}}}
+\label{pruneA}
+\end{equation}
+  will be nearly equal to those of the un-pruned problem.   
+To prune  \Eq{pruneB}  (\Eq{pruneA}) one must identify small   rows of the  desired portion of   ${\bf{B}}$ (${\bf{A}}$).  
+%
+The gap between small and not small is larger for ${\bf{B}}$ than for ${\bf{A}}$, however, 
+similar   results are  obtained  by pruning the basis vectors that correspond to the smallest  rows of 
+$\bf{A}$ and ${\bf{B}}$.   They are similar  because 
+eigenvalues of the transpose of a matrix are equal to eigenvalues of the matrix and 
+%
+  most of the removed rows of   $ { \bf{    G^{-1} }} $ correspond to removed  rows of    $ { \bf{    G^{-\dagger} }} $
+%
+
+
+
+All of the ideas of this subsection are built on the suggestion  of ST that it is best to first project into a finite (DVR) basis and only afterwards to 
+discard vectors that correspond to vN functions.   A fundamental difference between our approach and ST's is that we formulate the solution as  a regular eigenvalue
+problem,
+ $  \bf{ M Y } = {\bf{ Y  \tilde{E} }} ~    $.   
+This makes using iterative eigensolvers practical.
+%
+   Whenever rows of the desired portion of the matrix of  eigenvectors are tiny,  rows and columns of  $ { \bf{ M  }}  $
+can be discarded, regardless of the size of the elements.  Tiny here refers to being orders of magnitude smaller than the kept rows of the matrix of eigenvectors. 
+   The approach of ST  also  works, although they (separately) prune  two matrices  and solve a generalized eigenvalue problem.   Why does the ST 
+approach work?   ST solve   
+%JB changed X^ST to B^ST below, also added _c after chopping
+  $  {\bf{   { S^{-1}  G^{\dagger} H G        S^{-1} B^{ST} =   S^{-1} B^{ST} \widetilde{E^{ST}}}}}$.  Although when all matrices are $ N \times N$, it is clear that ${\bf{\widetilde{E^{ST}}}} ={  
+ \bf{\widetilde{E}}} $, it is not obvious,  after pruning to obtain 
+ $  {\bf{ C^T  { S^{-1}}    G^{\dagger} H G  { S^{-1}} C  B_c^{ST}}}= {\bf{ C^T   S^{-1}  C   B_c^{ST}  \widetilde{E_c^{ST}}}} $, that $
+   {\bf{\widetilde{E_c^{ST}}}} \approx   {\bf{\widetilde{E_c^{B}}}}$. 
+%where   ${\bf{C^T G^{\dagger} H     G^{-\dagger}   S^{-1}     C B_C = B_C  \widetilde{E_C^{B}} }} $. 
+   It is true because (1) columns of 
+$ { \bf{ B^{ST}  }}  $ are proportional to columns of $ { \bf{ B  }}  $ and therefore  the desired portion of  $ { \bf{ B^{ST}  }}  $ has  $N-N_{k}$ rows with tiny  elements;
+ (2)  
+when solving         $  {\bf{   { S^{-1}  G^{\dagger} H G        S^{-1} B^{ST} =   S^{-1} B^{ST} \widetilde{E^{ST}}}}}$   % $\bf{        X = BXE}$, 
+both $ { \bf{( B^{ST})^{\dagger}  S^{-1}  G^{\dagger} H G        S^{-1}
+       B^{ST}  = \Lambda_1  }}  $   and 
+ $ { \bf{   (B^{ST})^{\dagger}    S^{-1}    B^{ST}     = \Lambda_2 }}  $  are diagonal, where
+ $ { \bf{ \widetilde{E^{ST}}=  \Lambda_1  {\Lambda_2}^{-1}  }}  $,
+%
+and therefore    replacing the 
+elements of
+ $ { \bf{   S^{-1}  G^{\dagger} H G        S^{-1} }}  $   and  $ { \bf{     S^{-1}   }}$
+%
+whose row and  column indices correspond to the   $N-N_{k}$ 
+discarded basis vectors, 
+with zeros, has almost no effect on $N_{k}$  eigenvalues.  Note that this does not mean that elements replaced by zeros are small.   
+
+
+  
+Another difference between the approach of Refs. \citenum{Shimshovitz2012}
+and \citenum{Shimshovitz2014}   
+is the definition of  ${\bf{ G  }}$.   We define    $ {(\bf{  G}})_{\alpha,m} $ = $ \langle \phi_\alpha  \vert     g_m   \rangle  $   and ST define 
+$ {(\bf{  G^{ST}}})_{\alpha,m} $ = $   g_m(x_{\alpha}) $.   $ {(\bf{  G}})_{\alpha,m}  \ne   $ $ {(\bf{  G^{ST}}})_{\alpha,m} $  because DVR functions depend, in general,  on 
+quadrature weights and a weight function.
+\cite{Light1985,Bacic1989,Wei1994,Light2000} 
+%
+%
+If the weights are all equal the difference between 
+ $ {(\bf{  G}}) $ and     $ {(\bf{  G^{ST}}}) $ is unimportant.   
+In general,  
+ $ {(\bf{  G}})_{\alpha,m} $ =  $
+ \sqrt{W^{(N)}_{\alpha}/w(x_{\alpha})} g_m(x_{\alpha}) $,
+where  $W^{(N)}_{\alpha}$ is a quadrature weight and $w(x)$ is the weight function of the polynomials used to define the DVR.   Defining  $ {(\bf{  G}})_{\alpha,m} $  as we do,
+ ${\bf{ G^{\dagger} V^{DVR} G     }} $ is a quadrature approximation to 
+ $  \langle  g_{m'} \vert \hat{V}  \vert g_m \rangle     $.    
+Including the weights   
+decreases the size of the elements in the desired portion of  
+ ${\bf{ B   }} $  that correspond to vN functions one wishes to discard and therefore improves the quality of the pruned basis.  
+%
+%
+It is possible to attain pruneability with $any$ basis for which 
+rows of  $  {\bf{T^{\dagger}}}$  are not nearly linearly dependent and for which 
+multiplying 
+rows of $  {\bf{T^{\dagger}}}$  by columns of $  {\bf{U}}$ yields small numbers.  
+ This will be the case  for any DVR basis.  There is no periodicity requirement.\cite{Brown2015}
+
+
+
+
+
+\subsection{ Comparison of projecting   $\hat{H}$   and projecting     $  {\bf{  H  }}$   }\label{ssecc} 
+
+
+
+
+%
+Why does using  a basis of non-orthogonal $ {g}_m $ functions   to compute eigenvalues of $\hat{H}$ 
+by solving \Eq{davis}   not work   as well as  solving    $  {\bf{ G^{\dagger} H  G^{-\dagger}    B}}= {\bf{B  \tilde{E}}} $? 
+%
+It is partly   due to the fact that pruning $  {\bf{ G^{\dagger} H  G^{-\dagger}    }}$
+ introduces less error.   %  tc  out  when   projecting       $  {\bf{  H  }}$.
+% when solving  $  {\bf{ G^{\dagger} H  (G^{\dagger})^{-1}    B}}= {\bf{B  \tilde{E}}} $ pruning introduces less error.  
+% 
+When     calculating  eigenvalues of  $\hat{H}$  one removes rows and columns of $two$  matrices and 
+ when  calculating  eigenvalues of   $  {\bf{  H  }}$  one removes rows and columns of only $one$  matrix.   
+%
+%
+
+
+%
+The simplest way to prune \Eq{full} is to remove rows and columns of both   $ {\bf{S_G }}  $ and    $ {\bf{H_G }}  $.
+An  eigenvalue problem of the form 
+$  \bf{ M Y } = {\bf{Y  \Lambda }}    $
+is prune-able if basis functions are 
+ sorted by diagonal elements of  
+$ { \bf{ M }}   $  and 
+  off-diagonal elements of $ { \bf{ M }}   $ 
+are smaller further from the diagonal.  
+%
+One might imagine that the  eigenvalue problem of \Eq{full} would be  prune-able if 
+the vNs were  sorted by the energy of the phase space point at which they are localized and    off-diagonal elements of 
+both ${\bf{H_G}}$ and ${\bf{S_G}}$  were  smaller further from the diagonal.  
+${\bf{H_G}}$ and ${\bf{S_G}}$  matrices with this property are nearly diagonal.  
+ However,  even if  ${\bf{H_G}}$ $and$  ${\bf{S_G}}$ 
+ are nearly diagonal,   ${\bf{S_G^{-1} H_G}}$ (and  ${\bf{S_G^{-1/2} H_G S_G^{-1/2} }}$) are  not  and therefore pruning  significantly degrades the quality of the eigenvalues.
+%
+
+
+
+
+
+
+To understand better why needing to prune    two matrices causes error and to establish a   link between projecting  $\hat{H}$   and projecting     $  {\bf{  H  }}$ ,
+it is helpful to think about moving    ${\bf{S_G}}$  to the left before pruning.   
+%
+ \Eq{davis}  can be  derived 
+ from 
+\begin{equation}\label{hameig}
+\hat{H} \vert   \psi_n   \rangle = \epsilon_n \vert \psi_n   \rangle   ~,
+\end{equation}
+in four  steps. 
+%
+   First, replace   $ \vert \psi_n    \rangle $ with $   \sum^F_{m} {W}_{mn}\vert g_m   \rangle  $ and  multiply on the left by    $ \langle g_{m'} \vert $,  ~ $m' =1, \cdots F$,  to obtain \Eq{full}.   
+Second,  define  
+ $      {\bf{\hat{Z}}} =   {\bf{S_G W}}  $. 
+   \Eq{full} is equivalent to   $      {\bf{ H_G  S_G^{-1}  \hat{Z}   }} =   {\bf{ \hat{Z} {E }   }}  $. 
+%
+Third,  remove $F-N_k$ rows and columns of the  $product$   $      {\bf{ H_G  S_G^{-1}   }} =  {\bf{ H_G  R_G   }}     $ (where $  {\bf{   R_G   }} $
+= $      {\bf{   S_G^{-1}   }} $)
+      to obtain the eigenvalue problem
+ $  {\bf{ ^rH_G  ~ ^rR_G   {Z}   }} =   {\bf{ {Z} \tilde{E}    }}  $, where  
+ $      {\bf{ ^rH_G }}$ and     $      {\bf{ ^rR_G }}$ are rectangular matrices.   
+Fourth, replace  $
+  {\bf{ ^rH_G }}$  with the square matrix obtained from it by removing  $F-N_k$ columns  of    $
+  {\bf{ ^rH_G }}$   and 
+%   
+ $      {\bf{ ^rR_G }}$ 
+ with the square  matrix  $
+ {\bf{S^c_G }}$ made by removing rows and columns of  ${\bf{S_G}}  $ and $then$ inverting.  
+%
+The fourth step degrades the accuracy  of eigenvalues.  It requires replacing  $      {\bf{ ^rR_G }}$     with the inverse of the retained-retained corner of
+  $  {\bf{   S_G}}$.   When  $  {\bf{   S_G}}$ is not nearly diagonal they may be quite different.    
+%
+\Eq{pruneB} corresponds to not implementing the fourth step,   but instead inserting DVR resolutions of the identity, with $ F$   terms,    into 
+%
+ $  ({\bf{ H_G }})_{m'm} =      \langle g_{m'}  \vert \hat{H} \vert g_m \rangle   $
+and
+ $  ({\bf{ S_G }})_{m'm} =      \langle g_{m'}  \vert  g_m \rangle   $.    
+ $  {\bf{ H_G }}  $ is then replaced with   $  {\bf{ G^{\dagger} H  G }}  $ and 
+ $  {\bf{ S_G }}  $ is replaced with    $  {\bf{ G^{\dagger} G   }}  $.  One can then exploit  the fact that 
+ ${\bf{ G   S^{-1}    }}$   =  ${\bf{   G^{-\dagger}     }}$.   This approach  has the advantage that it obviates  the fourth step  without needing to deal with the complete (with 
+$ m=1,2, \cdots F $) basis.    
+
+ 
+
+
+
+
+
+%tc before we were comparing chop product with chop factors and take more dvr.   chop factors and take more dvr is much worse.  this shows that chop factors is bad.  
+% i think the important point is not that adding  more dvr does not help but that chopping factors is bad  
+% 
+
+%
+Starting with the    $F \times F$     eigenvalue problem of   the second  step  and introducing DVR resolutions of the identity,  one obtains 
+ ${\bf{ G^{\dagger} H G     S^{-1}    B = B  \tilde{E} }} $, where ${\bf{S^{-1}}=\bf{\left(G^{\dagger}G\right)^{-1}}=\bf{G^{-1}G^{-\dagger}}}$.  
+If the   size of the eigenvalue problem is then reduced by implementing the third and fourth steps, one solves   
+ ${\bf{ C^T G^{\dagger} H G  C  (C^T    S C)^{-1}    \widehat{B_c} = \widehat{B_c}  \widehat{E_c^{B}} }} $.   
+The errors are large.   They are large, not due to the discretization created by introducing    the   DVR resolutions of the identity, but because of the approximations inherent in 
+ the fourth step.
+%
+ This is confirmed by  starting with 
+ ${\bf{ G^{\dagger} H G     (G^T G)^{-1}    B = B  \tilde{E} }} $.  
+in which all of the matrices are    $F  \times F$  and  replacing   ${\bf{  G }}$ with a rectangular matrix made by   from   $F$ vN functions and  $F+1$  DVR functions.  
+If the discretization were causing the problem, adding a DVR function would not increase errors.  However, 
+%
+for the Morse potential of \Refs{Shimshovitz2012,Brown2015},
+with 197 
+  DVR  $ \phi_{\alpha}$ functions  and 196 vNs,  the error in  the ground state  is $ 5 \times 10^{-2}$  hartree.  Using 
+%${\bf{ C^T G^{\dagger} H G^{-\dagger} C   B_C = B_C  \widetilde{E_C^{B}} }} $, where all the matrices are    196 $\times$ 196   %
+${\bf{  G^{\dagger} H G^{-\dagger}    B = B  \tilde{E} }} $, where all the matrices are    196 $\times$ 196   %
+the error is    
+$ 5\times 10^{-14} $  hartree.  
+This is dramatic confirmation of the error introduced by pruning ${\bf{  G^{\dagger} H G }}$   and  ${\bf{  S}}$   separately (as in the fourth step) rather than 
+   pruning one matrix (${\bf{  G^{\dagger} H G^{-\dagger} }}$).   
+%
+%
+%
+It is also true that the accuracy of the eigenvalues of the ST equation
+($  {\bf{ C^T  { S^{-1}}    G^{\dagger} H G  { S^{-1}} C  B_c^{ST}}}= {\bf{ C^T   S^{-1}  C   B_c^{ST}  
+\widetilde{E_c^{ST}}}} $)  %,  where  ${\bf{S^{-1}}=\bf{\left(G^{\dagger}G\right)^{-1}}}$,
+is ruined by using $F+1$ DVR functions because when ${\bf{ G}}$ is rectangular 
+%
+${\bf{\left(G^{\dagger}G\right)^{-1}} \neq \bf{G^{-1}G^{-\dagger}}}$.
+ %tc i'd omit take out %JB that is fine
+%This emphasizes the importance of pruning   after forming the product    
+%$  {\bf{   { S^{-1}}    G^{\dagger} H G  { S^{-1}}}}$, with square ${\bf{G}}$ matrices.
+%
+% 
+%
+%
+Implementing  the fourth step outlined above 
+introduces error that can be avoided by, instead, using an equation like    $  {\bf{ G^{\dagger} H  (G^{\dagger})^{-1}    B}}= {\bf{B  \tilde{E}}} $.
+This will be true not only with vN functions,  but whenever 
+ phase-space localized  basis functions are used to   compute  eigenvalues of   $\hat{H}$.
+%
+Of course, some  sets of phase-space localized functions are better than others.  A good set of functions reduces the error made in the fourth step.
+  The more nearly diagonal  $
+ {\bf{ H_G    }} $ and  $
+ {\bf{  S_G   }}$, the smaller is  the error.   
+%
+
+
+
+
+
+\subsection{ Are  rows of a matrix like $ {\bf{B}}$ tiny even when no intermediate basis is used?  }\label{ssecd}
+
+
+As explained in subsection \ref{ssecb},    $  {\bf{  G^{\dagger} H G^{-\dagger}   }}$  is prune-able because rows of the desired portion of    ${\bf{B}}$ are tiny.   In this subsection,
+we explain  that a similar  eigenvector matrix $
+{\bf{ \tilde{B}}} $ for  the eigenvalue problem obtained with     $\hat{H}$,  does not have tiny rows.   The intermediate basis therefore facilitates pruning.
+%
+ The most obvious way to      find       an eigenvalue problem  for which  the desired  part of the   matrix of  eigenvectors,
+ like the desired portion of   ${\bf{B}}$,  has tiny rows, but that  is obtained 
+ without introducing a DVR intermediate basis,   is to expand 
+  $  \psi_n(x)  $ 
+ in the basis,
+\begin{equation}
+  \vert  b_i   \rangle    =\sum_{m=1}^{N_k}   
+ \vert {g}_m    \rangle   \left({\bf{S^c_G}}^{-1}\right)_{mi} ~,      
+\label{defconb}
+\end{equation}
+where, $i=1,2, \cdots, N_k$,
+and then multiply the TISE on the left by $ \langle g_k \vert   $.
+The expansion coefficients, $  \tilde{b}_{in}   $,
+\begin{equation}\label{bexp}
+\vert  \psi_n  \rangle  = \sum_i^{N_k}  \vert b_i     \rangle  \tilde{b}_{in}     
+\end{equation}
+satisfy 
+%
+\begin{equation}
+\sum_i^{N_k}  \langle  g_k \vert \hat{H} \vert b_i  \rangle    \tilde{b}_{in}     = 
+ \sum_i^{N_k}   \langle  g_k   \vert b_i \rangle   \tilde{b}_{in}    {E}_n ~.  % careful with E symbol
+\label{bcontfun}
+\end{equation}
+Does the desired portion of  ${\bf{\tilde{B}}}$,
+where $({\bf{\tilde{B}}})_{in}=   \tilde{b}_{in} $,
+ have tiny rows?   
+If it does then one expects to be able to prune the eigenvalue problem of \Eq{bcontfun}.    
+%
+Compare \Eq{bexp} with the equation for   $ \vert  \psi_n  \rangle  $  obtained by pre-multiplying   $ \vert  \psi_n  \rangle  $  with
+a vN resolution of the identity. %
+\begin{equation}\label{afterres}
+\vert  \psi_n  \rangle  = \sum^{F}_{i,m} \vert {g}_m   \rangle   \left({\bf{S_G^{-1}}}\right)_{mi}    \langle {g}_{i}\vert  
+\psi_n  \rangle~,
+\end{equation}
+% tc we use  {S_G^{F}} and S_G for the same thing.  i removed the F %JB true
+where    $\left({\bf{S_G}}\right)$ is the overlap matrix of  a huge vN basis with $F$ functions,  $F>N_k$.  
+%
+The sum in
+ \Eq{defconb} has fewer terms, and therefore  
+ it is not 
+true that $ \tilde{b}_{in}  =  \langle {g}_{i}\vert  
+\psi_n  \rangle $. Although the matrix whose elements are
+$ \langle {g}_{i}\vert     %tc changed m' to i 
+\psi_n  \rangle $  will have small rows, one is not able to conclude that 
+the matrix whose elements are $ \tilde{b}_{in} $ also has small rows.  Thus,
+the eigenvalue problem of \Eq{bcontfun} is not pruneable.  
+
+
+
+
+
+
+%tc i do think we are almost explaining the same thing twice.  
+%JB I don't think moving away from infinity is impossible so added.  i do not understand this statement.   what is moving away from infinity
+%JB previously we used an infinite overlap matrix, but what I was trying to say with that is state clearly now.
+It is due to   the fourth step of subsection \ref{ssecc} that,  when   using    the vN functions as a basis (rather than using them to transform a matrix), the desired portion of 
+the eigenvector matrix  ${\bf{\tilde{B}}}$ does not have tiny rows. If    $\left({\bf{S_G}}\right)$  were block diagonal then the inverse of the upper left
+$N_k \times N_k$ block %JB changed below
+ of $\left({\bf{S_G}}\right)$ would equal the upper %tc i removed left .  but very good to add these details.  thanks. 
+$N_k \times N_k$ block of $      {\bf{ ^rR_G }}$,  and 
+%tc sorry but i really think it is clearer if this sentence is not broken up 
+%JB okay
+  the upper limit of the sums in \Eq{afterres}   could be reduced from $F$ to $N_k$.  This, in turn, would ensure  that  
+ $ \tilde{b}_{in}  =  \langle {g}_{i}\vert  
+\psi_n  \rangle $. 
+
+
+
+%  As both are $F$ and $N_k$ are 
+%arbitrary, a vN basis with $N_k$ functions will never be pruneable as a larger $F$ resolution of 
+%the identity can always be applied to show that  $ \tilde{b}_{in} $ does not have small matrix 
+%elements.  A basis could be found that is pruneable if for all $F>N_k$,  
+%$\left(\bf{S^{F}_G}^{-1}\right)_{mi}\approx 0$ for all $m>N_k$.  This would force \Eq{afterres} to 
+%reduce to \Eq{defconb} with $F-N_k$ extra starting functions which can be pruned.  Note that the 
+%above condition is satisfied when using orthonormal basis sets such that 
+%$\bf{S}=\bf{I}=\bf{S^{-1}}$.  It is only when attempting to expand in a non-orthogonal basis that 
+%more care has to be taken.  
+
+
+%tc i think this is collocation.  we can talk about it.  I think we offer enough options without this.   If it goes into the paper i do not see why it would belong in this section
+% tc perhaps we can even put this into a little chem phys letter?
+% you must be assuming that the quadrature overlsap in the boys equation is I ??   
+%JB added below.
+%It should be noted that, as with DVRs, you can truncate the defined space for the wavefunction and use the 
+%complete resolution of the identity therein to directly use the phase space functions of DH.  
+%For example, this can be done by restricting the $g_m$ functions to the same evenly spaced points $x_{\alpha}$ as ST used with the FGH in \Ref{Halverson2012}.
+%The eigenproblem that one solves is then
+%\begin{equation}\label{Eq.col}
+%C^{\dagger}G_h^{\dagger}G^{-\dagger}C L = L E
+%\end{equation}
+%where $\left(G_h\right)_{\alpha i}=-g_i^{\prime \prime}\left(x_{\alpha}\right)\sqrt{\mathrm{d}x}/2m+
+%V\left(x_{\alpha}\right)g_i\left(x_{\alpha}\right)\sqrt{\mathrm{d}x}$ and $G_{\alpha i}=g_i\left(x_{\alpha}\right)\sqrt{\mathrm{d}x}$.  The $m$ and $V\left(x\right)$ are taken from \Ref{Halverson2012}.
+%Starting with a range of $[-2.5,28.1]$ and $N=196$ evenly spaced points results in figure \ref{fig.1}.  The matrix $G_h^{\dagger}G^{-\dagger}$ is clearly pruneable. 
+%In the limit that both the range and the number of discrete sampling points goes to infinity, 
+%\Eq{Eq.col} would be identical to using a finite basis of $g_m$ basis functions with the complete resolution of the identity.  
+%Even though this basis is pruneable, you can obtain more efficient results by starting with a DVR because the quadrature is superior.  
+%In other words, you need fewer sampling points to obtain similar accuracy.  This is especially true for higher lying states.
+%
+%%tc i cannot get this to compile and have removed it 
+%%\begin{figure}[h!]
+%\centering
+%\includegraphics[width=0.5\textwidth]{cvsdvr.png}
+%\caption{\label{fig.1}}
+%\end{figure}
+%tc removed after bill's referee report.  if cannot discard rows then the fact that there are other problems is less important. 
+%
+%There is another problem.   
+%  one also  needs to compute   
+%$\langle  g_k \vert \hat{H} \vert b_i  \rangle $ matrix elements.  This might be done by  inserting a resolution of the identity,
+%%
+%% 
+%\begin{equation}   
+%\sum_i^N  \langle  g_k \vert \hat{H} 
+%\sum_{m,m^{\prime}}^{\infty}  \vert  g_m \rangle    
+%  (  ({\bf{S_G}})^{-1} )_{mm^{\prime}}   %
+%   \langle        g_{m^{\prime}}   
+%%
+%\vert b_i  \rangle    \tilde{b}_{in}
+%  =
+% \sum_i^N   %\langle  g_l   \vert b_i \rangle  
+% \tilde{b}_{in}    {E}_n ~.  
+%\label{binf}
+%\end{equation}
+%%
+%%
+%There are  $N$ $\vert b_i  \rangle $   and therefore  $  \langle        g_{m^{\prime}}   \vert  b_i  \rangle    
+%    \ne \delta_{m^{\prime}i}    $ when $m > N$, 
+%and the  left hand side  is not a product of
+%finite matrices.  
+%  Replacing the upper limit on the sum in the resolution of the identity with $N$ introduces  significant  error because 
+%$
+%\sum_{m,m^{\prime}}^{N}  \vert  g_m \rangle    
+%  (  ({\bf{S_G}})^{-1} )_{mm^{\prime}}  
+%   \langle        g_m   \vert   \ne  \sum_{\alpha}^{N}  \vert  \phi_{\alpha}  \rangle       \langle     \phi_{\alpha  }     \vert $.
+%Replacing the upper limit on the sum in the resolution of the identity with $N$ is exactly equivalent to pruning ${\bf{H}}$ and ${\bf{S}}$ separately, which fails.  
+%%
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+\section{Application to H$_2$O}\label{sec:h2o}
+
+
+
+
+
+There are  two key  advantages of writing the eigenvalue problem as 
+ $ {\bf{  C^T     G^{\dagger} H G^{-\dagger}  C  B_c}}= {  \bf{B}_c C  \widetilde{E_C^B}}$
+or 
+ $  {\bf{ C^T    G^{-1} H G C   A_c}}
+= {\bf{A_c  \widetilde{E_C^A}}}   
+ $
+rather than 
+%
+\\* $  {\bf{ C^T  { S^{-1}}    G^{\dagger} H G  { S^{-1}} C^T  B_c^{ST}}}= {\bf{C^T   S^{-1}  C  B_c^{ST}  \widetilde{E_c^{ST}}}} $.  First,  iterative eigensolvers  are much more
+costly for a generalized eigenvalue problem.\cite{Bai2000}  
+   For a generalized eigenvalue problem, it is necessary to solve linear equations at each step of the iteration.   If 
+matrices are large,  then the linear equations must also be solved with an iterative method. This means there are nested sets of matrix-vector products.      If vN basis 
+functions are to be useful for solving challenging vibrational problems, it is imperative that they be used in conjunction with iterative methods.   Without iterative methods, 
+it is necessary to store matrices.     Second,   although    $  {\bf{   S^{-1}  }}  $ is easy to compute,   $  {\bf{ [C^T   S^{-1}  C ]^{-1}}}  $  is not.   This is owing to the 
+%
+fact that  $  {\bf{   S  }}  $ is a  
+direct product of matrices, and thus its inverse is a direct product of inverses of small matrices.   To use the ST formulation with an 
+iterative eigensolver, one would need to solve linear equations with (or invert) the matrix    $  {\bf{ [C^T   S^{-1}  C ]   }}  $.
+%
+%
+
+%tc this now seems to be out of place.   i think everything here is already stated.  i removed %JB I agree
+%In this section,  we demonstrate that it is possible to efficiently use an iterative eigensolver to compute eigenvalues of  
+% $  {\bf{  C^T     G^{\dagger} H G^{-\dagger}  C  }}   $. 
+%%
+%   It should be noted that $  {\bf{      G^{\dagger}     }} $    is easy to invert because it is a direct product of % 1D matrices.  
+%small matrices.   
+
+
+
+
+
+
+
+We apply the ideas to compute vibrational energy levels of H$_2$O  using Radau \\*coordinates, %JB added line break
+\cite{Smith1980,Johnson1986} 
+ $r_1, r_2, \theta$, 
+ and the potential of Polyansky, Jensen, and Tennyson.\cite{Polyansky1996} 
+%
+   Before pruning,  the basis is a direct product basis with 
+functions  $ g_{{i_1},{j_1}}(r_1)  g_{{i_2},{j_2}}(r_2)  g_{{i_3},{j_3}}(\theta)  $   where, e.g., 
+%   
+  $ g_{{i_3},{j_3}}(\theta)  = \exp\left[-\alpha_3^{i_3}    \left(\theta-\theta^{i_3}\right)+ i p_3^{i_3,j_3}\left(\theta-\theta^{i_3}\right)\right]$. 
+ For the $k$th  coordinate there is   an $N_k^i \times N_k^j$ grid of vNs.    $N_k^i $ is the number of position centers   and  $N_k^j $ is the number of   momentum centers. 
+%  
+For     $r_k ~,~~ k=1,2$,   $N_k^i=5$  and $N_k^j=6$.    $r_k^{i_k}=1+i_k \mathrm{d}x-\mathrm{d}x/2$,  $i_k =1,2, \cdots N_k^i$,  where
+ $\mathrm{d}x=\left(4.5-1\right)/N_k^i$ and $1$ and 4.5 are the ends of the box in which we build a  sinc  DVR,\cite{Colbert1992}  with 30 functions.
+  Atomic units are used in this chapter.  
+%  
+  $p_k^{j_k}=\left(j_k-N_k^j/2\right)\mathrm{d}p+\mathrm{d}p/2$,
+ $j_k =1,2, \cdots N_k^j$,  
+ where $dp=h/dx$ which is equal  to $2\pi/dx$ in atomic units. $N_k^j$  is  even in this chapter.  
+The width parameter $\alpha_k^{i_k}$ is $\mathrm{d}p/(2\hbar \mathrm{d}x)$. \cite{Shimshovitz2012,Halverson2012,Davis1979}  %  
+%
+For the $\theta$ coordinate,    $N_3^i=8$  and $N^j_3=6$.   The   $\theta$  vNs are built from a Legendre DVR with 48 functions.   Although the Legendre functions are polynomials in
+$Z= \cos\theta$, we  use vNs that are 
+  $ {g}_{{i_3},{j_3}}(\theta)  =  
+    \exp\left[-\alpha_3^{i_3}    \left(\theta-\theta^{i_3}\right)+ i p_3^{i_3,j_3}\left(\theta-\theta^{i_3}\right)\right]$.  
+   The points $   \theta^{i_3} $,  $i_3 = 1, 2, \cdots, N_3^i$,  are    
+% 
+ $\theta^{i_3}=\left(\Theta^{i_3*N_3^j-N_3^j/2}+\Theta^{i_3*N_3^j-N_3^j/2+1}\right)/2$  where $\Theta^n$ is $\cos^{-1}(Z^n)$  with $Z^n$ being a Legendre DVR point.   Using vNs 
+that depend on  \cite{Shimshovitz2014}    
+ $  \left(\theta-\theta^{i_3}\right)$     
+rather than  $  \left(  Z-Z^{i_3}   \right)$   
+%
+yields a more equally spaced vN grid.   
+ $p_3^{i_3,j_3}=\left(j_3-N_3^{j_3}/2\right)\mathrm{d}p^{i_3}+\mathrm{d}p^{i_3}/2$, $j_3=1,2,\cdots, N_{3}^{j_3}$, 
+with $\mathrm{d}p^{i_3}=2\pi/\mathrm{d}\theta^{i_3}$
+where $\mathrm{d}\theta^{i_3}=\left(\theta^{i_3+1}-\theta^{i_3-1}\right)/2$ 
+but at the edges we use 
+ $\mathrm{d}\theta^1=\theta^{2}-\theta^{1}$ and $\mathrm{d}\theta^{N^i_3}=\theta^{N^i_3}-\theta^{N^{i}_3-1}$. 
+ For the  $\theta$ coordinate,    the width parameter  depends on  $\theta^i$ 
+%
+and is $\alpha^{i_3}=\mathrm{d}p^{i_3}/2\hbar \mathrm{d}\theta^{i_3}$.
+ %
+%
+This  helps  ensure linear independence of the columns of ${\bf{G}}$.    If the width parameter is independent  of $\theta^{i_3}$,   the condition number 
+of  ${\bf{G}}$ 
+  %
+may   be large, and  this would decrease    the accuracy of the computed energies.   
+%
+Even with the width parameter we choose, poor conditioning may  somewhat reduce the accuracy of energies computed with a Legendre DVR.  When an equally spaced
+DVR is used, there is no such problem.  
+% 
+%
+
+
+
+
+
+
+ A simple  
+ Arnoldi eigensolver  without  implicit or explicit restarts 
+ is used.\cite{Bai2000}
+    It would be easy to reduce the computation time by using ARPACK.\cite{Lehoucq1998b} 
+   The Lanczos algorithm is not an option because we need the
+eigenvalues of a non-symmetric matrix.   To use the     Arnoldi eigensolver we must 
+ evaluate matrix-vector products with both  $
+ {\bf{  C^T     G^{\dagger} V  G^{-\dagger}  C  }}   $ and $
+ {\bf{  C^T     G^{\dagger} K  G^{-\dagger}  C  }}$, where   
+ $  {\bf{     H = K + V       }} $ is a DVR matrix.
+%tc i think better to combine these two paragraphs .  they are both about matrix vector products %jb good idea
+%
+vNs are useful because the direct product basis can be pruned.  Pruning is obviously good because it reduces the size of the basis 
+and decreases (because it reduces  the spectral range) the number of matrix-vector products required to obtain converged eigenvalues.    However, pruning also 
+complicates the efficient evaluation of matrix-vector products. There is an ineluctable trade-off between reducing the size of the basis and increasing the complexity of
+the matrix-vector products.   
+ Iterative methods  are not  efficient if matrix-vector products are 
+ done by building the matrix and 
+explicitly multiplying rows of the matrix with the vector.  Instead, one must exploit either sparsity or structure of the matrix.   When solving the 
+Schr\"{o}dinger equation it is common to exploit structure because often matrices are not sparse.  To use a pruned VN basis, one must identify and exploit the  structure 
+of the pruned VN basis.   We do this by using sequential summation with summation limits that depend on indices not being summed over.\cite{Wang2001c,Avila2009,Avila2011,Avila2011b,Avila2012,Avila2013} 
+We also use mapping arrays.    
+
+
+
+%
+%
+
+%
+The size of the   full direct product basis is  $N_1 N_2 N_3 = N_1^i   N_1^j    N_2^i   N_2^j     N_3^i   N_3^j         $.   
+ A basis  function is  $ g_{n_1}(r_1)   g_{n_2}(r_2)   g_{n_3}(\theta)$.  The single index $n_k$ ($k=1,2,3$),   on a 1D vN represents 
+values of $ i_k$ and $j_k$.
+%
+%
+ The working basis is made by pruning this direct product basis.  The basis is pruned as explained in Section \ref{sec.prunejcp}.   
+%
+From the pruned basis we determine $
+ n_1(m_1), n_2(m_1,m_2),  n_3(m_1,m_2,m_3)$ and $M_1, M_2(m_1),M_3(m_1,m_2)$.  %
+%
+ $M_1, M_2(m_1),M_3(m_1,m_2)$ which  %tc i added which 
+are upper limits on sums (see below).  
+%
+%
+When doing matrix-vector products we sum over      consecutive values of        $ m_1$, which labels 
+ retained functions for  $r_1$,  over  
+   consecutive values of        $ m_2$, which labels 
+ retained functions for $r_2$,  
+ and over consecutive values of  $ m_3$, which labels 
+  retained functions for 
+ $\theta$.  
+%
+We begin by building a set of retained $n_1$ values.  $n_1$ values are in the list if they are in the pruned basis for at least one   ($n_2$, $n_3$) pair.  
+  The retained $n_1$ values are labelled with consecutive $m_1$ values and this establishes a link $n_1(m_1)$.
+  %
+In a similar fashion we 
+build a set, for a  specific $n_1(m_1)$,  that includes 
+  the   $n_2$ values  that  are in the pruned basis for at least one  value of 
+ $n_3$; this establishes  $n_2(m_1,m_2)$.   
+We then 
+build a set, for  specific $n_1(m_1)$  and $n_2(m_1,m_2)$ values,  that includes 
+  the   $n_3$ values  that  are in the pruned basis; this  establishes  $n_3(m_1,m_2,m_3)$. 
+  %
+%
+ We store  tables  for $n_1, n_2,$   and $n_3$.
+%
+%
+The number of elements in the  set of retained $n_1$ values is $M_1$. 
+%
+For each $m_1$  the number of  possible $m_2$ is   %
+$M_2(m_1)$.   
+  $M_3(m_1,m_2)$ is,     for each $m_1,m_2$ pair,   the  number of      $\theta$      functions.  
+%
+Each retained basis vector is labelled by $(m_1,m_2,m_3)$.   So that the vectors we manipulate are labelled by a single index we define a 
+final mapping array  
+%
+ $t(n_1,n_2,n_3)$.   Each value of $t$ corresponds to a triple $(m_1,m_2,m_3)$  and to a triple  $(n_1,n_2,n_3)$.   
+ %
+ $t$  is a table with as many  elements as  the full direct product size $N_1N_2N_3$.  
+%
+ Only triples $(n_1,n_2,n_3)$ that correspond to retained basis functions are assigned a value of $t$.    
+ $t$  is labelled in   lexicographical order, i.e.  $t(1,1,1)=1,t(1,1,2)=2, \cdots$.
+
+
+%
+%
+
+
+%
+Consider first the matrix-vector product in the pruned basis for the term with  $
+ {\bf{ V     }}$.  It is 
+%
+\begin{equation}  
+ {\bf{  C^T     G^{\dagger} V G^{-\dagger}  C    z_{n_1,n_2,n_3}  }}  ~,
+\label{choppedV}
+\end{equation}
+where ${\bf{       G^{\dagger} =   {^1G^{\dagger}}  \otimes  { ^2G^{\dagger}}  \otimes   {^3G^{\dagger}}    }}  $.
+%
+For the H$_2$O calculation,    the  condition numbers  of ${\bf{^1G}}$  (also   ${\bf{^2G}}$) and    ${\bf{^3G}}$
+  are   on the order of $10^1$   and  $10^3$ respectively.   These matrices     are  well conditioned and their inverses are accurate, 
+%
+  so  ${\bf{       G^{-\dagger} =   {^1G^{-\dagger}}  \otimes  { ^2G^{-\dagger}}  \otimes   {^3G^{-\dagger}}    }}  $ is accurate.  
+%
+%
+ They are  certainly orders of magnitude smaller than the condition number of ${\bf{S_G}}$, required to obtain good accuracy with \Eq{davis}.  
+%
+It should also be noted that in the ST formulation, the matrix whose condition number may cause numerical problems is 
+ ${\bf{  C^T G^{\dagger}G C}}$.  Its condition number is  roughly the square of  that of  
+ ${\bf{ ^1G }}$, required to use \Eq{pruneB}.   
+%
+%
+The pruned   matrix-vector product is
+%
+\begin{multline}  
+  \sum_{\alpha}  (^1{\bf{G}}^{\dagger}_{n'_1,\alpha} )
+  \sum_{\beta}( ^2{\bf{G}}^{\dagger})_{n'_2,\beta}  
+\sum_{\gamma}   (^3{\bf{G}}^{\dagger})_{n'_3,\gamma}  
+ V_{\alpha,\beta,\gamma}\quad \\  %
+ %
+\times \sum_{m_1=1}^{M_1}  (^1{\bf{G}}^{-\dagger}_{\alpha,n_1} ) 
+ \sum_{m_2=1}^{M_2(m_1)}   ( ^2{\bf{G}}^{-\dagger})_{\beta,n_2} 
+ \sum_{m_3=1}^{M_3(m_1,m_2)}    (^3{\bf{G}}^{-\dagger})_{\gamma,n_3}   
+z_{t\left(n_1,n_2,n_3\right)} %
+  % z_{t(n_1(m_1)   ,   n_2(n_1(m_1),m_2),    n_3(n_1(m_1),n_2(m_2,n_1(m_1)),m_3))}   ~,  
+\label{vmv} 
+\end{multline}
+where   $\alpha,\beta,\gamma$ label DVR points for $r_1, r_2, \theta$. 
+%
+All $n_k$ values in the matrix-vector product equations,  \Eq{vmv},  \Eq{tmv}, \Eq{tmv2},
+are derived from the $n_1(m_1), n_2(m_1,m_2),  n_3(m_1,m_2,m_3)$ tables.  
+Doing the sums sequentially in this fashion significantly reduces the cost of the matrix-vector product.  Similar ideas have been used 
+before.\cite{Wang2001c,Avila2009,Avila2011,Avila2011b,Avila2012,Avila2013,Manthe1990,Bramley1993,Chen2000}  
+%
+   If \Eq{choppedV} were implemented by building the matrix  ${\bf{  C^T     G^{\dagger} V G^{-\dagger} C }}$ and multiplying its rows with the vector,
+the cost of the matrix-vector product would scale as $N_{k}^2$, where  $N_{k}$ 
+%
+is the number of retained 3D VNs.  Sequential summation has been used with\cite{Wang2001c,Avila2009,Avila2011,Avila2011b,Avila2012,Avila2013,Manthe1990,Bramley1993,Chen2000} 
+%%
+ and
+without\cite{Manthe1990,Bramley1993,Chen2000,Wang2003,Dawes2010,Sarkar1999} 
+ constrained indices.  
+%
+
+
+
+
+
+
+
+
+
+
+
+
+
+The matrix-vector product for the term with  $
+ {\bf{ K     }}$    is simpler because the KEO is factorizable.  
+In   Radau coordinates  the KEO is\cite{Smith1980,Johnson1986}   %
+ %
+ %
+\begin{equation}\label{ham}
+T=-\dfrac{\hbar^2}{2\mu_1}\dfrac{\partial^2}{\partial r_1^2}-\dfrac{\hbar^2}{2\mu_2}\dfrac{\partial^2}{\partial r_2^2}-\dfrac{\hbar^2}{2}\left(\dfrac{1}{\mu_1r_1^2}+\dfrac{1}{\mu_2r_2^2}\right)\dfrac{\partial}{\partial Z}\left(1-Z^2\right)\dfrac{\partial}{\partial Z},
+\end{equation}
+where $Z=\cos \theta$, and $\mu_1=\mu_2$ is the mass of hydrogen.  
+% 
+  For the  $r_2$ term in the KEO,  the matrix-vector product is   
+\begin{equation}  
+%
+\sum_{m_1=1}^{M_1} 
+ \delta_{n'_1,n_1}
+\sum_{m_2=1}^{M_2(m_1)}
+   ({\bf{^2K_G}})_{n'_2,n_2}
+  \sum_{m_3=1}^{M_3(m_1,m_2)}
+    \delta_{n'_3,n_3}  
+    z_{t\left(n_1,n_2,n_3\right)}
+  %z_{t(n_1(m_1)   ,   n_2(n_1(m_1),m_2),    n_3(n_1(m_1),n_2(m_2,n_1(m_1)),m_3))}   ~,    
+ %
+\label{tmv}
+\end{equation}
+In this equation,
+\begin{equation}  
+ ({\bf{^2K_G}})_{c'_2,c_2}
+=  \sum_{\gamma,\gamma'}  {{\bf{^2G}}}^{\dagger}_{n'_2,\gamma}  {\bf{^2K}}_{\gamma',\gamma}   {{\bf{^2G}}}^{-\dagger}_{\gamma,n_2},  
+\end{equation}
+with 
+$ {\bf{ ^2K}} $ being a DVR matrix representing  the second  term in the KEO.
+%
+  For the  $r_1$ term in the KEO, the matrix-vector product is similar.
+%
+%
+%
+For the $\theta$ term it is, 
+\begin{multline}  
+ \sum_{m_1=1}^{M_1}  ({\bf{^1F}})_{n'_1,n_1} 
+\sum_{m_2=1}^{M_2(m_1)}
+  \delta_{n'_2,n_2}
+  \sum_{m_3=1}^{M_3(m_1,m_2)}
+   ({\bf{^3K_G}})_{n'_3,n_3} 
+   z_{t\left(n_1,n_2,n_3\right)} 
+ %z_{t(n_1(m_1)   ,   n_2(n_1(m_1),m_2),    n_3(n_1(m_1),n_2(m_2,n_1(m_1)),m_3))}  
++ \\
+\sum_{m_1=1}^{M_1} 
+ \delta_{n'_1,n_1}
+%
+\sum_{m_2=1}^{M_2(m_1)}  ({\bf{^2F}})_{n'_2,n_2}     
+  \sum_{m_3=1}^{M_3(m_1,m_2)}       ({\bf{^3K_G}})_{n'_3,n_3}      
+  z_{t\left(n_1,n_2,n_3\right)}
+ %z_{t(n_1(m_1)   ,   n_2(n_1(m_1),m_2),    n_3(n_1(m_1),n_2(m_2,n_1(m_1)),m_3))}   ~,
+\label{tmv2}
+\end{multline}  %
+
+where 
+%  
+\begin{equation}     
+ ({\bf{^kF}})_{n'_k,n_k} 
+= \frac{\hbar}{2 \mu_k}   
+\sum_{\alpha}  {{\bf{^kG}}}^{\dagger}_{n'_k,\alpha} 
+ \frac{1}{ (r_k^{\alpha})^2}  
+ ({\bf{^kG}}^{-\dagger}_{\alpha,n_k})
+\end{equation}
+%
+\begin{equation}  
+  ({\bf{^3K_G}})_{n'_3,n_3} = 
+  \sum_{\gamma,\gamma'}  {\bf{^3G}}^{\dagger}_{n'_3,\gamma}  {\bf{^3K}}_{\gamma',\gamma}   ({\bf{^3G}}^{-\dagger}_{\gamma,n_3})
+\end{equation}
+with $ {\bf{ K^3}} $
+ being a DVR matrix representing  $\dfrac{- \partial}{\partial Z}\left(1-Z^2\right)\dfrac{\partial}{\partial Z}  $.
+
+
+
+
+
+
+
+In the 
+ matrix-vector product for the term with  $
+ {\bf{ V    }}$,   the sums over the DVR indices are not constrained and the DVR grid is large.    This will make it hard, despite the prune-ability of the 
+VN basis to compute the vibrational spectrum of a molecule with a general potential and having more than 5 atoms.  The size of the product grid for a molecule with 5 
+atoms is roughly $10^9$.  One option is to convert the potential to sum of products (SOP) form.\cite{Jaeckle1996,Manzhos2007,Manzhos2008}  
+%
+%
+ There are  competing methods that also exploit the SOP form.\cite{Beck2000,Leclerc2014}
+%
+  Another option is to use a constrained grid.\cite{Avila2009, Lauvergnat2014}  
+%
+% This would necessitate expanding in an FBR instead of a DVR.  Using \Eq{our},this is possible if we insert the identity $T^tT$ where $T$ is the corresponding DVR-FBR\cite{Light2000} transformation matrix
+%\begin{equation}
+%\bf{C^{\dagger}  G^{-1}T T^{\dagger} V T T^{\dagger} G  CV}={\bf{VE}}.
+%\end{equation}
+%where $T^{\dagger}VT$ is the usual FBR quadrature that has shown the ability to be reduced\cite{Avila2011}.  In order to produce the matrix vector products here, sequential operations to %expand the condensed non direct-product grid to the full product grid are used.  
+
+
+
+
+
+\subsection{Results \label{sec.prunejcp}  }
+
+
+
+%tc  made error in this line \subsection{Results label{sec.prune}  }
+
+Although the use of a vN basis is motivated by the idea that only vNs centered at points in the classically allowed region of phase space should be required to solve
+the Schr\"{o}dinger equation, in practice one needs more.    Even in 1D this is true.   \cite{Tannor2014}   
+ If it were possible to do a calculation with a very large vN basis, one could  identify  the vNs that can be safely removed from the basis by examining 
+ components   of   eigenvectors.  In practice,  one needs a strategy for adding vNs to build up the basis.   
+ Putting vNs in the classically allowed region gives  a good starting 
+basis.      
+ In \Refc{Shimshovitz2014} 
+%
+the authors  add     to the basis,   vNs that are phase-space neighbors of vNs that are in the basis and which have
+large eigenvector components.   We use a simpler method that might  result in a basis that is larger than the one would obtain using the ST method.   
+%
+%
+   We start by keeping all   the 3-D vNs  that have a potential value (at the vN's center ) below $5500~ $cm$^{-1}$.   
+%  
+The 50 lowest  eigenvalues/eigenvectors are then computed using the Arnoldi algorithm.  
+%
+%
+If, for a given $n$,    $  c_g =  \sum_{n=1}^{50} \vert B_{g,n} \vert $   
+is smaller  than some threshold  value, that determines the size of the final basis,
+%
+the corresponding  vN is deemed unimportant and removed from  the basis.  
+%
+Denote the basis obtained after the vNs are removed  the current basis.   
+To the current  basis,  we add other vNs in a shell around it.  
+%
+%
+To build the shell, we add, e.g. for $\theta$,  for each $\theta^{i_3}$ for which there are vNs with   
+%
+$ p_3^{i_3,j_3} $, two new vNs with the same   $\theta^{i_3}$,
+ one with $     p_3^{i_3,j_3} =   p_3^{i_3,j_3^{max}} + dp_3^{i_3} $  
+%
+ where    $  p_3^{i_3,j_3^{max}} $       is the largest  $ p_3^{i_3,j_3} $,  and one with 
+ $ -   p_3^{i_3,j_3^{max}}     -dp_3^{i_3} $.
+% 
+%
+We also add four additional  vNs,  two  with  $\theta^{max}_{i_3} + d\theta_{i_3}$  and $     p_3^{i_3+1,j_3} = \pm  p_3^{i_3+1,j_3=N_3^j/2} $ and two with 
+ $\theta^{min}_{i_3} -  d\theta^{N_3^{i_3}}$  and
+ $     p_3^{i_3-1,j_3}   = \pm  p^{i_3-1,j_3=N_3^j/2}$.      
+%
+%
+To obtain real eigenvalues it is 
+ necessary to
+ add/keep vNs in pairs  with     $\pm p^{ij}$.   
+%
+ 3D vNs in the  shell are made by taking all possible products of the added 1D vNs with themselves and with vNs in the current basis.  
+%
+  The lowest 50 eigenvalues are then re-calculated and  vNs with small $c_g$ are removed to 
+determine a new current basis.   This process is repeated by adding and pruning new shells until eigenvalues of the desired accuracy are obtained.  
+The number of basis functions added in a shell would be large for a molecule with more atoms.    The 
+Shimshovitz, Bacic, and Tannor 
+ scheme for adding basis functions  \cite{Shimshovitz2014} 
+only adds vNs  that are neighbours of vNs  that make  a significant contribution to the previously calculated eigenfunctions and therefore adds fewer vNs that are later 
+removed using  eigenvector coefficients.   
+
+
+
+
+
+
+  
+
+The results in  Table \ref{JCP1Tab.1} demonstrate that  when using \Eq{pruneB}, it is possible to significantly reduce the size of the vN basis.   It is straightforward to compute
+exact vibrational levels of H$_2$O using a direct product DVR.    These are used as reference energies to assess the accuracy of the pruned vN bases.   The direct product DVR
+basis has 
+30 sinc  DVR functions for $r_1$ and 30 sinc DVR  for $r_2$ and 48 Legendre DVR for $\theta$.   
+%  
+Eigenvalues of the DVR matrix were computed with a Lanczos eigensolver using established ideas.\cite{Bramley1993}  
+With only      $7528$ vN basis functions  all errors  are 
+below $2.1$cm$^{-1}$.  The largest error with a   pruned vN  basis of size $9512$  is  $0.17$cm$^{-1}$. 
+%
+
+
+\singlespace
+\begin{center}
+\begin{small}
+\begin{longtable}{|m{2cm} | r | r | r | }
+
+\caption[Error of lowest 100 vibrational levels of H$_2$O]{\label{JCP1Tab.1} The error of the lowest 100 calculated vibrational energies  computed with \Eq{pruneB} and %JB fixed equation reference 
+ two different pruned basis sets. Absolute error is relative to calculated energies E converged to less than 0.01cm$^{-1}$.
+}\\
+\hline
+ &  &\multicolumn{2}{c|}{Absolute Error (cm$^{-1}$)}\\
+ \cline{3-4}
+  n  & \multicolumn{1}{c|}{E(cm$^{-1}$)}  	& \multicolumn{1} {c|}{N=7528}  & \multicolumn{1} {c|}{N=9512} \\	
+	\hline
+	\endfirsthead
+	
+\multicolumn{4}{c}%
+{{ \tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+n  & \multicolumn{1} {c|}{E(cm$^{-1}$)}  & \multicolumn{1} {|c|}{N=7528}  & \multicolumn{1} {|c|}{N=9512} \\	
+	\hline
+\endhead
+
+\hline \multicolumn{4}{r}{{Continued on next page}} \\ 
+\endfoot
+
+\endlastfoot
+
+   0   &    4634.76   &   0.00    &     0.00    \\                   
+   1   &    6229.42   &   0.00    &     0.00    \\                   
+   2   &    7786.25   &   0.00    &     0.00    \\                   
+   3   &    8291.87   &   0.00    &     0.00    \\                   
+   4   &    8390.59   &   0.00    &     0.00    \\                   
+   5   &    9301.60   &   0.01    &     0.00    \\                   
+   6   &    9869.69   &   0.00    &     0.00    \\                   
+   7   &    9966.12   &   0.00    &     0.00    \\                   
+   8   &   10767.85   &   0.02    &     0.00    \\                   
+   9   &   11409.94   &   0.01    &     0.00    \\                   
+  10   &   11506.31   &   0.00    &     0.00    \\                   
+  11   &   11836.90   &   0.00    &     0.00    \\                   
+  12   &   11884.60   &   0.01    &     0.00    \\                   
+  13   &   12079.43   &   0.01    &     0.00    \\                   
+  14   &   12171.42   &   0.02    &     0.00    \\                   
+  15   &   12908.59   &   0.02    &     0.00    \\                   
+  16   &   13008.70   &   0.01    &     0.00    \\                   
+  17   &   13396.48   &   0.00    &     0.00    \\                   
+  18   &   13441.53   &   0.01    &     0.00    \\                   
+  19   &   13486.11   &   0.06    &     0.00    \\                   
+  20   &   13634.80   &   0.00    &     0.00    \\                   
+  21   &   14354.87   &   0.10    &     0.02    \\                   
+  22   &   14467.42   &   0.02    &     0.01    \\                   
+  23   &   14679.25   &   0.42    &     0.00    \\                   
+  24   &   14919.28   &   0.00    &     0.00    \\                   
+  25   &   14963.22   &   0.02    &     0.00    \\                   
+  26   &   15156.51   &   0.00    &     0.00    \\                   
+  27   &   15235.55   &   0.07    &     0.04    \\                   
+  28   &   15248.52   &   0.09    &     0.03    \\                   
+  29   &   15503.27   &   0.02    &     0.00    \\                   
+  30   &   15667.30   &   0.01    &     0.00    \\                   
+  31   &   15702.48   &   0.14    &     0.00    \\                   
+  32   &   15850.04   &   0.80    &     0.02    \\                   
+  33   &   15872.14   &   0.02    &     0.01    \\                   
+  34   &   16401.45   &   0.01    &     0.02    \\                   
+  35   &   16447.29   &   0.05    &     0.01    \\                   
+  36   &   16642.54   &   0.01    &     0.00    \\                   
+  37   &   16774.37   &   0.05    &     0.04    \\                   
+  38   &   16785.94   &   0.10    &     0.04    \\                   
+  39   &   16959.16   &   0.34    &     0.00    \\                   
+  40   &   17041.59   &   0.02    &     0.00    \\                   
+  41   &   17139.45   &   0.19    &     0.00    \\                   
+  42   &   17200.10   &   0.01    &     0.00    \\                   
+  43   &   17203.70   &   0.08    &     0.02    \\                   
+  44   &   17833.30   &   0.03    &     0.04    \\                   
+  45   &   17887.17   &   0.13    &     0.02    \\                   
+  46   &   18085.93   &   0.02    &     0.01    \\                   
+  47   &   18229.26   &   0.64    &     0.01    \\                   
+  48   &   18277.45   &   0.02    &     0.07    \\                   
+  49   &   18287.47   &   0.11    &     0.05    \\           
+  50   &   18428.03   &   0.46     &    0.02    \\                   
+  51   &   18438.30   &   0.44     &    0.05    \\                   
+  52   &   18464.15   &   0.25     &    0.01    \\                   
+  53   &   18466.30   &   0.07     &    0.04    \\                   
+  54   &   18544.98   &   0.07     &    0.00    \\                   
+  55   &   18701.56   &   0.00     &    0.00    \\                   
+  56   &   18856.57   &   0.13     &    0.04    \\                   
+  57   &   18954.19   &   0.15     &    0.04    \\                   
+  58   &   19173.43   &   0.05     &    0.02    \\                   
+  59   &   19182.55   &   0.34     &    0.02    \\                   
+  60   &   19267.15   &   0.29     &    0.05    \\                   
+  61   &   19400.59   &   2.08     &    0.03    \\                   
+  62   &   19499.34   &   0.34     &    0.05    \\                   
+  63   &   19553.81   &   1.52     &    0.04    \\                   
+  64   &   19741.99   &   0.11     &    0.08    \\                   
+  65   &   19753.54   &   0.08     &    0.07    \\                   
+  66   &   19848.83   &   0.74     &    0.01    \\                   
+  67   &   19980.41   &   0.25     &    0.00    \\                   
+  68   &   19983.06   &   0.04     &    0.02    \\                   
+  69   &   20010.59   &   0.14     &    0.04    \\                   
+  70   &   20170.34   &   0.02     &    0.01    \\                   
+  71   &   20377.45   &   0.10     &    0.05    \\                   
+  72   &   20441.09   &   0.92     &    0.01    \\                   
+  73   &   20467.93   &   0.14     &    0.05    \\                   
+  74   &   20558.14   &   0.26     &    0.09    \\                   
+  75   &   20667.40   &   0.24     &    0.02    \\                   
+  76   &   20683.23   &   0.06     &    0.02    \\                   
+  77   &   20743.35   &   1.00     &    0.06    \\                   
+  78   &   20831.88   &   0.13     &    0.03    \\                   
+  79   &   21162.87   &   0.13     &    0.07    \\                   
+  80   &   21176.92   &   0.21     &    0.05    \\                   
+  81   &   21343.24   &   0.89     &    0.04    \\                   
+  82   &   21424.91   &   0.18     &    0.05    \\                   
+  83   &   21457.63   &   0.01     &    0.02    \\                   
+  84   &   21458.34   &   0.24     &    0.03    \\                   
+  85   &   21532.67   &   0.38     &    0.17    \\                   
+  86   &   21532.84   &   0.22     &    0.14    \\                   
+  87   &   21601.81   &   0.02     &    0.01    \\                   
+  88   &   21697.60   &   0.57     &    0.07    \\                   
+  89   &   21797.03   &   0.59     &    0.13    \\                   
+  90   &   21862.07   &   0.23     &    0.11    \\                   
+  91   &   21948.37   &   0.22     &    0.08    \\                   
+  92   &   21969.74   &   0.32     &    0.14    \\                   
+  93   &   22024.77   &   0.88     &    0.08    \\                   
+  94   &   22083.25   &   0.88     &    0.04    \\                   
+  95   &   22095.43   &   0.04     &    0.04    \\                   
+  96   &   22131.71   &   0.36     &    0.01    \\                   
+  97   &   22163.24   &   0.08     &    0.05    \\                   
+  98   &   22385.39   &   0.06     &    0.02    \\                   
+  99   &   22521.26   &   0.53     &    0.03    \\  
+  \hline       
+         
+\end{longtable}
+\end{small}  
+\end{center}
+\doublespace
+
+
+
+
+
+
+
+
+
+
+\section{Conclusion}
+
+
+In this chapter we demonstrate that an iterative eigensolver can be straightforwardly and efficiently used with 
+ a pruned vN (Gaussian) basis  when the eigenvalue problem is formulated as in  \Eq{pruneB}.  %  
+  We also explain in detail the  importance  of first projecting into a DVR basis and then using vNs to contract the DVR basis.   This is the
+first time that vN basis functions have been used in conjunction with an iterative eigensolver.   If vN basis functions are to be useful for studying polyatomic
+dynamics, it is imperative that the matrix equations  be formulated as a regular (not a generalized) eigenvalue problem.   To use iterative methods to solve a
+generalized eigenvalue problem, nested iterations are required.  
+%
+To use      \Eq{pruneB},      one must evaluate 
+ matrix-vector products   with 
+   $  {\bf{G^{\dagger} H G ^{-\dagger}  }}$.   In many dimensions, elements of 
+ $  {\bf{     G ^{-\dagger}  }}$  are simple products of elements of  
+ $  {\bf{     G ^{-\dagger}  }}$ matrices for a single coordinate.       There is no need to invert a large matrix.
+%
+The ability to  use phase-space  localized basis functions and an iterative eigensolver  opens the door to studying 
+larger polyatomic molecules.      An example calculation of  vibrational
+ levels  of H$_2$O  shows clearly that it possible to significantly prune the vN basis without degrading the quality of the energies.
+
+
+
+
+It is tempting  to assume that the best way  to  make  a   prune-able     phase-space localized   basis  is to make basis functions 
+so that,  when the basis functions are sorted by the energy of the phase-space point at which they are localized,  elements of 
+both  ${\bf{H}}$  and   ${\bf{S}}$
+ of the eigenvalue problem ${\bf{  H X = S XE}}$ are smaller further from the diagonal.    However,  even if 
+ ${\bf{H}}$  and   ${\bf{S}}$  
+are nearly diagonal, 
+ ${\bf{S^{-1} H }}$  (and  ${\bf{S^{-1/2} H S^{-1/2}}}$)
+ may not be and therefore pruning may significantly degrade the quality of the eigenvalues.  
+%
+The key idea of ST is to start with a DVR matrix  ${\bf{H}}$ 
+and to use vNs that are linear combinations of the original set of DVR functions to contract the DVR basis.    This gives the 
+eigenvalue problem,
+ $  \bf{G^{\dagger} H G A} = {\bf{S A \tilde{E}}} $,   which can be re-written as 
+ $   {\bf{G^{\dagger} H G ^{-\dagger}  }  B}= {\bf{B  \tilde{E}}} $. 
+%
+ Rows and columns of 
+ $  {\bf{G^{\dagger} H   { G^{-\dagger}}  }}$ 
+%tc removed S above %JB okay
+can be removed because  the desired part of 
+ $ { \bf{ B}}$  has rows with tiny elements.  Note that the elements in the rows and columns of $  {\bf{G^{\dagger} H G ^{-\dagger}  }}$ that are removed are not small.   
+
+
+
+
+
+
+
+Iterative eigensolvers have been used with polynomial (including DVR) bases for \\* %JB new line added
+years.\cite{Bacic1989,Henderson1990,Bowman1991,Qiu1998,Mladenovic2002a,Mladenovic2002b, Luckhaus2000,Carter1988,Bramley1994b,Koput2001,Wang2002,Yu2002,Wang2004,Yu2002b,Tremblay2006,Lee2003}
+%
+They make it possible to compute vibrational levels of 
+molecules with general potentials and as many as 6 atoms.\cite{Wang2008,Yu2004,Avila2012}   %
+%
+ The multiconfiguration time-dependent Hartree  method uses optimized 1D functions and is also able to solve
+the Schr\"{o}dinger equation for general potentials when the number of atoms is 6 or even larger.\cite{Vendrell2009}  
+%
+Are pruned vN basis methods competitive?    Although the ideas of this chapter that make it possible to combine vN bases with iterative solvers are critical, significant 
+problems remain.    The success of pruning for H$_2$O, demonstrated by the results of 
+  Table \ref{JCP1Tab.1}  is impressive, but contraction schemes based on polynomial basis functions are better.  Better pruning schemes might make the vN methods more 
+competitive.  The effectiveness of standard contraction methods, whether used with a direct eigensolver\cite{Bacic1989,Henderson1990,Bowman1991,Qiu1998,Mladenovic2002a,
+Mladenovic2002b, Luckhaus2000}  
+or an iterative eigensolver,\cite{Bramley1994b,Wang2002,Yu2002,Wang2004,Yu2002,Tremblay2006,Lee2003}  %
+%
+is based,  in contrast to vN contraction, on the quality of the  zeroth-order approximation used to define the basis functions.   A vN approach is not based on a 
+zeroth-order approximation and might work well where standard contraction methods are poor.  It might, for example, be better for multi-well potentials.   
+We have shown that for  H$_2$O, it is possible to make a vN basis from a direct product of sinc and Legendre DVR functions and then contract it with vNs.   If this also works
+for problems with  potentials which do not have SOP form,\cite{Wang2011,Nesbitt1988}    
+ the vN approach will be important. 
+However, to apply the vN approach of this chapter  to multi-well problems,  one must develop better ideas for doing potential matrix-vector products.   In this chapter we use a full
+direct product grid.   It might be possible to use non-product quadratures.\cite{Avila2009,Avila2011,Avila2011,Avila2012,Avila2013}   %
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% ****** End of file apstemplate.tex ******

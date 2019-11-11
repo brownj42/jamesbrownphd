@@ -1,0 +1,463 @@
+%% ****** Start of file apstemplate.tex ****** %
+%%
+%%
+%%   This file is part of the APS files in the REVTeX 4 distribution.
+%%   Version 4.1r of REVTeX, August 2010
+%%
+%%
+%%   Copyright (c) 2001, 2009, 2010 The American Physical Society.
+%%
+%%   See the REVTeX 4 README file for restrictions and more information.
+%%%
+% This is a template for producing manuscripts for use with REVTEX 4.0
+% Copy this file to another name and then work on that file.
+% That way, you always have this original template file to use.
+%
+% Group addresses by affiliation; use superscriptaddress for long
+% author lists, or if there are many overlapping affiliations.
+% For Phys. Rev. appearance, change preprint to twocolumn.
+% Choose pra, prb, prc, prd, pre, prl, prstab, prstper, or rmp for journal
+%  Add 'draft' option to mark overfull boxes with black boxes
+%  Add 'showpacs' option to make PACS codes appear
+%  Add 'showkeys' option to make keywords appear
+\documentclass[aps,prl,reprint,groupedaddress,twocolumn]{revtex4-1}
+%JBnew use below to revert to old template
+%\documentclass[aps,prl,preprint,groupedaddress]{revtex4-1}
+\usepackage{graphicx}
+
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[extra]{tipa}
+
+
+
+
+
+%\documentclass[aps,prl,preprint,superscriptaddress]{revtex4-1}
+%\documentclass[aps,prl,reprint,groupedaddress]{revtex4-1}
+
+% You should use BibTeX and apsrev.bst for references
+% Choosing a journal automatically selects the correct APS
+% BibTeX style file (bst file), so only uncomment the line
+% below if necessary.
+%\bibliographystyle{apsrev4-1}
+
+\begin{document}
+
+% Use the \preprint command to place your local institutional report
+% number in the upper righthand corner of the title page in preprint mode.
+% Multiple \preprint commands are allowed.
+% Use the 'preprintnumbers' class option to override journal defaults
+% to display numbers if necessary
+%\preprint{}
+
+%Title of paper
+\chapter{Comment on "Phase-Space Approach to Solving the Time-Independent Schr\"{o}dinger Equation"}\label{ch:PRL}
+
+% repeat the \author .. \affiliation  etc. as needed
+% \email, \thanks, \homepage, \altaffiliation all apply to the current
+% author. Explanatory text should go in the []'s, actual e-mail
+% address or url should go in the {}'s for \email and \homepage.
+% Please use the appropriate macro foreach each type of information
+
+% \affiliation command applies to all authors since the last
+% \affiliation command. The \affiliation command should follow the
+% other information
+% \affiliation can be followed by \email, \homepage, \thanks as well.
+\author{James Brown}
+\email[]{9jhb3@queensu.ca}
+%\homepage[]{Your web page}
+%\thanks{}
+%\altaffiliation{}
+\author{Tucker Carrington Jr.}
+\email[]{Tucker.Carrington@queensu.ca}
+%\homepage[]{Your web page}
+%\thanks{}
+%\altaffiliation{}
+\affiliation{Department of Chemistry, Queen's University, Kingston, Ontario K7L 3N6}
+%Collaboration name if desired (requires use of superscriptaddress
+%option in \documentclass). \noaffiliation is required (may also be
+%used with the \author command).
+%\collaboration can be followed by \email, \homepage, \thanks as well.
+%\collaboration{}
+%\noaffiliation
+
+\date{\today}
+
+%\begin{abstract}
+% insert abstract here
+%\end{abstract}
+
+% insert suggested PACS numbers in braces on next line
+\pacs{}
+% insert suggested keywords - APS authors don't need to do this
+%\keywords{}
+
+%\maketitle must follow title, authors, abstract, \pacs, and \keywords
+\maketitle
+
+% body of paper here - Use proper section commands
+% References should be done using the \cite, \ref, and \label commands
+
+
+ Shimshovitz and Tannor (ST) \cite{Shimshovitz2012} introduced a periodic von Neumann (vN) basis for solving the Schr\"{o}dinger 
+equation. 
+%
+ Their contribution is important because it outlines ideas that make it possible to prune a vN basis.
+  We   point  out that, contrary to statements of ST,  neither their  biorthogonal  pvb basis nor the periodicity of the underlying sinc functions are required
+to make  a pruneable basis with which results of similar quality are obtained.  
+  The first attempt to use a vN basis \cite{Davis1979} was unsuccessful.  Other approaches to 
+exploiting the phase-space locality of 
+vN functions  are those of \Refs{Poirier2003,Halverson2012}.
+%  
+%bill4 is   B. Poirier, J. Theo. Comput. Chem. 2, 65 (2003). %Poirier2003
+%bill5 is  B. Poirier and A. Salam, J. Chem. Phys. 121, 1690 (2004). %Poirier 2004a
+%bill6 is  B. Poirier and A. Salam, J. Chem. Phys. 121, 1704 (2004). %Poirier 2004b
+%bill7 is  T. Halverson and B. Poirier, J. Chem. Phys. 137, 224101 (2012). %Halverson2012
+%
+ ST use  vN Gaussians  to contract a 
+Fourier grid Hamiltonian (FGH) discrete variable representation (DVR) basis,
+  The simultaneous diagonalization basis of Refs \citenum{Dawes2005,Dawes2006} was used in a similar fashion to contract a harmonic basis. 
+ ST begin with a pvN basis, 
+%
+\begin{equation}\label{eq.1}
+\tilde{g}_m\left(x\right) =\sum_{n=1}^{N}\phi_n\left(x\right)g_m\left(x_n\right)
+\end{equation}
+where  $g_m(x)  $ are  vN Gaussians   and   $\phi_n\left(x\right)$ are  periodic sinc functions centered at 
+equally spaced points  $x_n$ and transform  the time-independent Schr\"{o}dinger equation (TISE) in the FGH  basis,
+ $\bf{ H   U} = {\bf{UE}}$, 
+%
+%\begin{equation}
+%\bf{ H^{sDVR}    U} = {\bf{UE}}
+%\end{equation}
+to obtain 
+\begin{equation}
+\bf{G^{\dagger} H G V} = {\bf{S V E}} ~,
+\label{pvnunchop}
+\end{equation}
+where  $G_{ij}=g_j\left(x_i\right)$,  ${\bf{S}}$ = ${\bf{G^{\dagger} G}}$   and ${\bf{U}}$ = ${\bf{GV }}$.   
+%
+ST propose transforming to a pvb basis, 
+\begin{equation}
+\bf{S^{-1} G^{\dagger} H G S^{-1}  Z} = {\bf{ S^{-1}    Z E}} ~,
+\label{bvnunchop}
+\end{equation} 
+where ${\bf{Z}}$ = ${\bf{S V }}$. 
+Both \Eq{pvnunchop} and \Eq{bvnunchop} are generalized eigenvalue problems of the form 
+\begin{equation}
+\bf{AY } = {\bf{ BYL}}~.
+\label{genform}
+\end{equation}  
+%
+The pruned pvN eigenvalue problem is $\bf{     C^{\dagger}G^{\dagger} H  GCV}  =   \bf{C^{\dagger}SCV \tilde{E}}~$,
+%\begin{equation}\label{eq.2}
+%\bf{     C^{\dagger}G^{\dagger} H^{sDVR} GCV}  =   \bf{C^{\dagger}SCVE}~, 
+%\end{equation}  
+ where ${\bf{C}}$ has  $n_k$  diagonal elements equal to   one  and $n_d=N-n_k$  elements equal to zero.  Matrices  playing
+ the role of $both$  ${\bf{A }}$  and $ {\bf{ B}}$,  in \Eq{genform}    are chopped.
+Pruning  the pvN  basis significantly degrades the accuracy of the energies.   
+%
+The pruned pvb eigenvalue problem is 
+%
+\begin{equation}\label{eq.3}
+\bf{C^{\dagger}S^{-1}G^{\dagger} H  GS^{-1}CU}=\bf{C^{\dagger}S^{-1}CU \doubletilde{E}},
+\end{equation}   
+and in this basis, it $is$  possible to prune and maintain accuracy!
+Again,    
+the matrices playing  the role of $both$  ${\bf{A }}$  and $ {\bf{ B}}$  are chopped.   
+
+
+
+
+
+There is, however,  no need to introduce the pvb basis.   Starting with \Eq{pvnunchop},  moving ${\bf{S}}^{-1}$ to the left and $then $
+pruning, one obtains the nonsymmetric eigenvalue problem 
+\begin{equation}\label{our}
+\bf{C^{\dagger}  S^{-1}  G^{\dagger} H^{DVR} G  CV}={\bf{V  \bar{E}}}.
+\end{equation} 
+%
+It is easier to solve    Eq (\ref{our}) than \Eq{eq.3}   with    iterative eigenvalue solvers  
+ because  it is not a generalized eigenvalue problem
+(therefore larger systems are accessible).  
+%\cite{Bai2000}
+%tc this is   Z. Bai, J. Demmel, J. Dongarra, A. Ruhe and H. van der Vorst, editors, 
+%Templates for the solution of Algebraic Eigenvalue Problems: A Practical Guide . SIAM, Philadelphia, 2000
+%  
+For the 1D Morse potential of  Ref. \citenum{Shimshovitz2012},  we compare eigenvalues computed with   \Eq{our}   and \Eq{eq.3},
+using  $N=196$ initial basis functions. 
+%
+In both cases, the error does not 
+decrease until about $n_k = 98$.   
+ %Thus,  the pvN basis,  truncated using    \Eq{our},  has   most of the advantages of the pvb basis.  
+%  The most important idea is to use 
+%Gaussians to contract rather than to use them as basis functions.  
+%
+ \begin{figure}[h!]
+ \includegraphics[scale=0.65]{fig_1ab.eps}%
+ \caption{The error of the 22nd eigenvalue of the Morse oscillator
+\label{fig.1} a) Comparison of ST's pvb with the FGH and \Eq{our} with the Colbert and Miller (CM)\cite{Colbert1992} Sinc DVRs. %JB24
+   b) Comparison of Hermite (H$_n(x)$) and Legendre (P$_n(x)$) DVRs using \Eq{our} and ST's pvb.}
+ \end{figure}
+%
+
+
+According to  ST, the accuracy of the \Eq{eq.3} levels  is due in part  to the
+ periodicity of the  sinc DVR.  We have confirmed that with  \Eq{our}, energies obtained with 
+non-periodic DVRs \cite{Light2000}  are also accurate; see  Figure \ref{fig.1}b  for the Morse oscillator of ST. 
+ Figure \ref{fig.1}b is  generated with   vN  functions 
+  at $\sqrt{N}$ position values $x_i$ that are  a subset of the    DVR  points. %,  
+%
+After sending this comment to ST,   we learned that they had done pvb calculations with other DVRs.   \cite{ShimshovitzUP}  
+The fact that both  \Eq{our} and the ST approach work with other DVRs  is clearly incompatible with 
+ the assertion  that periodicity is important.  
+% 
+% When $n_k$ is small the pvN energies are, however, more accurate.  
+ %We have  done similar calculations with other potentials.  
+%It might be possible to choose the vN parameters  to improve the accuracy.   
+%
+Knowing that the ST idea of contracting with Gaussians can be applied to other DVRs opens the door to using it to solve many problems
+for which      sinc DVRs are not ideal.  
+ %Legendre DVRs are well suited to solving problems in polyspherical coordinates.   %Legendre matrix elements of 
+%the    polyspherical kinetic energy operator are well known. 
+%
+% 
+%
+
+
+
+In summary, it  is not necessary to think in terms of the  pvb basis ST  introduced if the pvN eigenproblem is truncated as in \Eq{our},   and 
+ the contraction idea ST use   enables one to use Gaussians to contract any DVR basis. %JB25
+%
+
+
+% If in two-column mode, this environment will change  to single-column
+% format so that long equations can be displayed. Use
+% sparingly.
+%\begin{widetext}
+% put long equation here
+%\end{widetext}
+
+% figures should be put into the text as floats.
+% Use the graphics or graphicx packages (distributed with LaTeX2e)
+% and the \includegraphics macro defined in those packages.
+% See the LaTeX Graphics Companion by Michel Goosens, Sebastian Rahtz,
+% and Frank Mittelbach for instance.
+%
+% Here is an example of the general form of a figure:
+% Fill in the caption in the braces of the \caption{} command. Put the label
+% that you will use with \ref{} command in the braces of the \label{} command.
+% Use the figure* environment if the figure should span across the
+% entire page. There is no need to do explicit centering.
+
+% \begin{figure}[h!]
+% \includegraphics[scale=0.4]{fig_1ab.eps}%
+% \caption{The error of the 22nd eigenvalue of the Morse oscillator
+%\label{fig.1} a) Comparison of ST's pvb  and \Eq{our}.   b) Comparison of three different DVRs using Eq (\ref{our}).}%JBnew added reference to Eq (7)
+% \end{figure}
+
+% Surround figure environment with turnpage environment for landscape
+% figure
+% \begin{turnpage}
+% \begin{figure}
+% \includegraphics{}%
+% \caption{\label{}}
+% \end{figure}
+% \end{turnpage}
+
+% tables should appear as floats within the text
+%
+% Here is an example of the general form of a table:
+% Fill in the caption in the braces of the \caption{} command. Put the label
+% that you will use with \ref{} command in the braces of the \label{} command.
+% Insert the column specifiers (l, r, c, d, etc.) in the empty braces of the
+% \begin{tabular}{} command.
+% The ruledtabular enviroment adds doubled rules to table and sets a
+% reasonable default table settings.
+% Use the table* environment to get a full-width table in two-column
+% Add \usepackage{longtable} and the longtable (or longtable*}
+% environment for nicely formatted long tables. Or use the the [H]
+% placement option to break a long table (with less control than 
+% in longtable).
+% \begin{table}%[H] add [H] placement to break table across pages
+% \caption{\label{}}
+% \begin{ruledtabular}
+% \begin{tabular}{}
+% Lines of table here ending with \\
+% \end{tabular}
+% \end{ruledtabular}
+% \end{table}
+
+% Surround table environment with turnpage environment for landscape
+% table
+% \begin{turnpage}
+% \begin{table}
+% \caption{\label{}}
+% \begin{ruledtabular}
+% \begin{tabular}{}
+% \end{tabular}
+% \end{ruledtabular}
+% \end{table}
+% \end{turnpage}
+
+% Specify following sections are appendices. Use \appendix* if there
+% only one appendix.
+%\appendix
+%\section{}
+
+% If you have acknowledgments, this puts in the proper section head.
+\begin{acknowledgments}
+This research was supported by the NSERC of Canada.  
+\end{acknowledgments}
+
+% Create the reference section using BibTeX:
+%\bibliography{/home/jbrown/Documents/bibliography/citations}
+
+%merlin.mbs apsrev4-1.bst 2010-07-25 4.21a (PWD, AO, DPC) hacked
+%Control: key (0)
+%Control: author (8) initials jnrlst
+%Control: editor formatted (1) identically to author
+%Control: production of article title (-1) disabled
+%Control: page (0) single
+%Control: year (1) truncated
+%Control: production of eprint (0) enabled
+\begin{thebibliography}{9}%
+\makeatletter
+\providecommand \@ifxundefined [1]{%
+ \@ifx{#1\undefined}
+}%
+\providecommand \@ifnum [1]{%
+ \ifnum #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \@ifx [1]{%
+ \ifx #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \natexlab [1]{#1}%
+\providecommand \enquote  [1]{``#1''}%
+\providecommand \bibnamefont  [1]{#1}%
+\providecommand \bibfnamefont [1]{#1}%
+\providecommand \citenamefont [1]{#1}%
+\providecommand \href@noop [0]{\@secondoftwo}%
+\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
+\providecommand \@href[1]{\@@startlink{#1}\@@href}%
+\providecommand \@@href[1]{\endgroup#1\@@endlink}%
+\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
+  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
+\providecommand \@@startlink[1]{}%
+\providecommand \@@endlink[0]{}%
+\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
+\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
+\providecommand \urlprefix  [0]{URL }%
+\providecommand \Eprint [0]{\href }%
+\providecommand \doibase [0]{http://dx.doi.org/}%
+\providecommand \selectlanguage [0]{\@gobble}%
+\providecommand \bibinfo  [0]{\@secondoftwo}%
+\providecommand \bibfield  [0]{\@secondoftwo}%
+\providecommand \translation [1]{[#1]}%
+\providecommand \BibitemOpen [0]{}%
+\providecommand \bibitemStop [0]{}%
+\providecommand \bibitemNoStop [0]{.\EOS\space}%
+\providecommand \EOS [0]{\spacefactor3000\relax}%
+\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
+\let\auto@bib@innerbib\@empty
+%</preamble>
+\bibitem [{\citenamefont {Shimshovitz}\ and\ \citenamefont
+  {Tannor}(2012)}]{Shimshovitz2012}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Shimshovitz}}\ and\ \bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
+  {Tannor}},\ }\href {\doibase 10.1103/PhysRevLett.109.070402} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo
+  {volume} {109}},\ \bibinfo {pages} {070402} (\bibinfo {year}
+  {2012})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Davis}\ and\ \citenamefont
+  {Heller}(1979)}]{Davis1979}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.~J.}\ \bibnamefont
+  {Davis}}\ and\ \bibinfo {author} {\bibfnamefont {E.~J.}\ \bibnamefont
+  {Heller}},\ }\href {\doibase http://dx.doi.org/10.1063/1.438727} {\bibfield
+  {journal} {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf
+  {\bibinfo {volume} {71}},\ \bibinfo {pages} {3383} (\bibinfo {year}
+  {1979})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Poirier}(2003)}]{Poirier2003}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Poirier}},\ }\href {\doibase 10.1142/S0219633603000380} {\bibfield
+  {journal} {\bibinfo  {journal} {Journal of Theoretical and Computational
+  Chemistry}\ }\textbf {\bibinfo {volume} {02}},\ \bibinfo {pages} {65}
+  (\bibinfo {year} {2003})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Halverson}\ and\ \citenamefont
+  {Poirier}(2012)}]{Halverson2012}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Halverson}}\ and\ \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Poirier}},\ }\href {\doibase http://dx.doi.org/10.1063/1.4769402} {\bibfield
+   {journal} {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf
+  {\bibinfo {volume} {137}},\ \bibinfo {eid} {224101} (\bibinfo {year}
+  {2012})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Dawes}\ and\ \citenamefont
+  {Carrington}(2005)}]{Dawes2005}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Dawes}}\ and\ \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Carrington}},\ }\href {\doibase http://dx.doi.org/10.1063/1.1863935}
+  {\bibfield  {journal} {\bibinfo  {journal} {The Journal of Chemical Physics}\
+  }\textbf {\bibinfo {volume} {122}},\ \bibinfo {eid} {134101} (\bibinfo {year}
+  {2005})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Dawes}\ and\ \citenamefont
+  {Carrington}(2006)}]{Dawes2006}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Dawes}}\ and\ \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Carrington}},\ }\href {\doibase http://dx.doi.org/10.1063/1.2162168}
+  {\bibfield  {journal} {\bibinfo  {journal} {The Journal of Chemical Physics}\
+  }\textbf {\bibinfo {volume} {124}},\ \bibinfo {eid} {054102} (\bibinfo {year}
+  {2006})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Colbert}\ and\ \citenamefont
+  {Miller}(1992)}]{Colbert1992}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~T.}\ \bibnamefont
+  {Colbert}}\ and\ \bibinfo {author} {\bibfnamefont {W.~H.}\ \bibnamefont
+  {Miller}},\ }\href {\doibase http://dx.doi.org/10.1063/1.462100} {\bibfield
+  {journal} {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf
+  {\bibinfo {volume} {96}},\ \bibinfo {pages} {1982} (\bibinfo {year}
+  {1992})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Light}\ and\ \citenamefont
+  {Carrington}(2007)}]{Light2000}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~C.}\ \bibnamefont
+  {Light}}\ and\ \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Carrington}, \bibfnamefont {Jr.}},\ }\enquote {\bibinfo {title}
+  {Discrete-variable representations and their utilization},}\ in\ \href
+  {\doibase 10.1002/9780470141731.ch4} {\emph {\bibinfo {booktitle} {Advances
+  in Chemical Physics}}}\ (\bibinfo  {publisher} {John Wiley \& Sons, Inc.},\
+  \bibinfo {year} {2007})\ pp.\ \bibinfo {pages} {263--310}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Shimshovitz}\ \emph {et~al.}()\citenamefont
+  {Shimshovitz}, \citenamefont {Takemoto},\ and\ \citenamefont
+  {Tannor}}]{ShimshovitzUP}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Shimshovitz}}, \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont
+  {Takemoto}}, \ and\ \bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
+  {Tannor}},\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {Adv.
+  Chem. Phys.}\ }}\bibinfo {note} {(To be Published)}\BibitemShut {NoStop}%
+\end{thebibliography}%
+
+
+
+
+
+
+\end{document}
+%
+% ****** End of file apstemplate.tex ******
+

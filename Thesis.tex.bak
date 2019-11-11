@@ -1,0 +1,181 @@
+%*************************************************************************************************************
+% PREAMBLE STUFF
+%*************************************************************************************************************
+% Instead of inserting my \usepackage and defined commands here, I keep them in a separate file
+\include{myPreamble}
+
+
+%*************************************************************************************************************
+% INCLUDE ONLY
+%*************************************************************************************************************
+% Use if you want to include only certain parts of the document, example \includeonly{introduction}
+% in order to speed up compile time when you're focussing on some particular part.
+%\includeonly{}
+
+%*************************************************************************************************************
+% DOCUMENT
+%*************************************************************************************************************
+
+\begin{document}
+
+%*************************************************************************************************************
+% TITLE
+%*************************************************************************************************************
+
+\title{Using phase-space localized basis functions to obtain vibrational energies of molecules}
+
+\author{James Brown}
+
+\dept{Department of Physics, Engineering Physics \& Astronomy}
+\degree{Doctor of Philosophy}
+
+% OPTIONAL HERE
+% ~~~~~~~~~~~~~
+% \submitdate{month year in which submitted to GPO}
+%        - date LaTeX'd if omitted
+% \copyrightyear{ear degree conferred}
+%        - year LaTeX'd if omitted
+% \figurespagetrue or \figurespagefalse
+%        - produce or don't produce a List of Figures page (true by default)
+% \tablespagetrue or \tablespagefalse
+%        - produce or don't produce a List of Tables page (true by default)
+
+\beforepreface
+
+% Adding single spacing so abstract and table of contents is single spaced.
+
+%*************************************************************************************************************
+% ABSTRACT
+%*************************************************************************************************************
+
+\prefacesection{Abstract}
+
+\input{Abstract}
+
+%*************************************************************************************************************
+% ACKNOWLEDGEMENTS
+%*************************************************************************************************************
+
+\prefacesection{Acknowledgements}
+
+
+First and foremost, I would like to thank my supervisor Tucker Carrington Jr. for his guidance and patience the past six years.  Special thanks also goes to Xiao-gang Wang and Gustavo Avila for the fruitful discussions and technical support. 
+
+I would also like to acknowledge the moral support provided from my friends and family especially my Mother, Father, Paul, Mary, and Rober. Lastly, I would not be who or where I am today without my wife Katie.  
+
+
+%*************************************************************************************************************
+% MEATY CHAPTERS
+%*************************************************************************************************************
+
+%Testing my index\index{index} abilities.  And
+%sub-entry\index{index!subentry} abilities.
+
+% This command can be used to view the page layout for this document
+% \layout
+
+% Here, I'm tweaking how much space is put above and below floats.
+% Comment out if you want the *purest* latex spacing.
+\setlength{\abovedisplayskip}{3pt plus1pt minus1pt}
+\setlength{\abovedisplayshortskip}{3pt plus1pt minus1pt}
+\setlength{\belowdisplayskip}{3pt plus1pt minus1pt}
+\setlength{\belowdisplayshortskip}{3pt plus1pt minus1pt}
+
+% Include my chapter texts - kept separated to make editing easier.
+\include{Introduction}
+\include{Background}
+\include{PRL/PRL}
+\include{JCP1/JCP1}
+\include{JCP2/JCP2}
+\include{Conclusion}
+
+%*************************************************************************************************************
+% BIBLIOGRAPHY
+%*************************************************************************************************************
+% This GATHER command is useful for when you want to use WinEdt's Gather functionality, i.e., type
+% \cite{} and a popup box appears with all of your citations to choose from.  Leave the % on the next line.
+%GATHER{thesis.bib}
+
+% Put in \nocite{*} so all entries in the bibliography are included
+%\nocite{*}
+
+% quthesis style is plain, but I prefer alpha
+\bibliographystyle{unsrt}
+
+\bibliography{DFT,citations}
+
+%*************************************************************************************************************
+% APPENDICES
+%*************************************************************************************************************
+\appendix
+
+
+
+%*************************************************************************************************************
+% GLOSSARY
+%*************************************************************************************************************
+
+% Include all glossary items, even the ones not referred to.  Leave the % in the next line.
+%GATHER{glossary.bib}
+
+% Rem to delete %%% if using the glossary...
+%\gloss[nocite]{*}
+% Insert the glossary HERE
+%\printgloss{glossary}
+
+%*************************************************************************************************************
+% INDEX
+%*************************************************************************************************************
+% Here's where the index would be printed, if you created one.  Remove the % on the next line.
+%\printindex
+
+%*************************************************************************************************************
+% CURRICULUM VITAE
+%*************************************************************************************************************
+
+%\chapter*{Vita}
+%\addcontentsline{toc}{chapter}{Vita}
+
+% Note:  If you find that the CV starts having a heading at the top of the page
+% (i.e., the heading from the bibliography or last section), then that means that
+% the tabular environment has become too big to stay on one page.
+
+%\singlespacing
+%\begin{tabular}{ll}
+%\textbf{Name}                           & James Brown \\
+%                                        & \\
+%\textbf{Place and year of birth}\ \     & Birth Place, Year\\
+%                                        & \\
+%\textbf{Education}                      & B.Sc. \\
+%                                        & Physics (Economics) \\
+%                                        & McMaster University \\
+%                                        & \\%
+%
+%\textbf{Experience}                     & Job 1 Line 1 \\
+%                                        & Job 1 Line 1 \\
+%                                        & Organization, Year(s) \\
+%                                        & \\
+%                                        & Job 2 Line 1 \\
+%                                        & Organization, Year(s) \\
+%                                        & \\
+%                                        & Job 3 Line 1 \\
+%                                        & Job 3 Line 2 \\
+%                                        & Organization, Year(s) \\
+%                                        & \\
+%                                        & Job 4 Line 1 \\
+%                                        & Organization, Year(s)\\
+%                                        & \\
+%\textbf{Major Awards}
+%                                        & Award 1, Year \\
+%                                        & \\
+%                                        & Award 2, Year \\
+%                                        & \\
+%                                        & Award 3, Years \\
+%
+% If I had publications
+% \textbf{Publications}                    & TBA\\
+
+%\end{tabular}
+%\doublespacing
+%*************************************************************************************************************
+\end{document}
